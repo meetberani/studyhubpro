@@ -3,8 +3,29 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-// Default API URL (Dynamic fallback for easy local hosting)
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Default API URL (Dynamic relative fallback for Monolith, with custom live path for Android APK compatibility)
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  
+  // If running inside native Android App (Capacitor WebView), window.location.origin is a local file schema, so use the hosted Render server
+  if (
+    window.location.origin.includes('file://') || 
+    (window.location.origin.includes('localhost') && !window.location.origin.includes('5000') && !window.location.origin.includes('5173'))
+  ) {
+    // Replace with your actual live Render Web Service URL once created
+    return 'https://premium-study-platform.onrender.com/api'; 
+  }
+  
+  // Local web dev server fallback
+  if (window.location.origin.includes('localhost:5173')) {
+    return 'http://localhost:5000/api';
+  }
+  
+  // Otherwise, if running in production browser monolith, dynamically resolve relative path
+  return window.location.origin + '/api';
+};
+
+export const API_URL = getApiUrl();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

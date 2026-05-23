@@ -80,7 +80,17 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date() });
 });
 
-// Fallback Route
+// Serve static assets if in production monolith mode
+if (process.env.NODE_ENV === 'production') {
+  console.log('[Monolith Engine] Mount static React client bundle from frontend/dist');
+  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../../frontend', 'dist', 'index.html'));
+  });
+}
+
+// Fallback Route for unmatched API calls
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: 'API route not found' });
 });
