@@ -1,0 +1,1049 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth, API_URL } from '../context/AuthContext';
+import StatCard from '../components/StatCard';
+import { TableRowSkeleton } from '../components/SkeletonLoader';
+import {
+  Users, Sparkles, Shield, DollarSign, BookOpen, Megaphone, Trash2, Check, X, ShieldAlert,
+  ShieldCheck, Upload, AlertCircle, FileText, Image as ImageIcon, Search, PlusCircle, ExternalLink, HelpCircle
+} from 'lucide-react';
+
+export default function AdminDashboard() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('stats');
+  
+  // States
+  const [stats, setStats] = useState({ totalUsers: 0, premiumUsers: 0, totalMaterials: 0, totalRevenue: 0 });
+  const [users, setUsers] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [notices, setNotices] = useState([]);
+  
+  // Loaders
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  
+  // Search state
+  const [userSearch, setUserSearch] = useState('');
+  
+  // Forms states
+  const [materialForm, setMaterialForm] = useState({ title: '', description: '', category: 'SSC', type: 'pdf', accessType: 'free' });
+  const [materialFile, setMaterialFile] = useState(null);
+  const [materialThumb, setMaterialThumb] = useState(null);
+  
+  const [noticeForm, setNoticeForm] = useState({ title: '', content: '', target: 'all' });
+  const [rejectReason, setRejectReason] = useState('');
+  const [activeRejectId, setActiveRejectId] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const categories = ['SSC', 'UPSC', 'Programming', 'Government Jobs', 'Spoken English', 'NEET/JEE'];
+
+  // Clear notifications
+  const clearMessages = () => {
+    setTimeout(() => {
+      setSuccessMsg('');
+      setErrorMsg('');
+    }, 5000);
+  };
+
+  // Fetch Stats
+  const fetchStats = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/admin/stats`);
+      if (res.data && res.data.success) {
+        setStats(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch Users
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/admin/users?search=${userSearch}`);
+      if (res.data && res.data.success) {
+        setUsers(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch Materials
+  const fetchMaterials = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/materials`);
+      if (res.data && res.data.success) {
+        setMaterials(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch Pending Payments
+  const fetchPayments = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/payments/admin/pending`);
+      if (res.data && res.data.success) {
+        setPayments(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch Notices
+  const fetchNotices = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/notices`);
+      if (res.data && res.data.success) {
+        setNotices(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Master Initializer
+  const loadTabData = async () => {
+    setLoading(true);
+    await fetchStats();
+    if (activeTab === 'users') await fetchUsers();
+    if (activeTab === 'materials') await fetchMaterials();
+    if (activeTab === 'payments') await fetchPayments();
+    if (activeTab === 'notices') await fetchNotices();
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadTabData();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      const delaySearch = setTimeout(() => {
+        fetchUsers();
+      }, 500);
+      return () => clearTimeout(delaySearch);
+    }
+  }, [userSearch]);
+
+  // Handle User Moderations
+  const handleToggleStatus = async (userId) => {
+    try {
+      const res = await axios.put(`${API_URL}/admin/users/${userId}/toggle-status`);
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message);
+        fetchUsers();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Failed to update user status.');
+      clearMessages();
+    }
+  };
+
+  const handleTogglePremium = async (userId, currentPremium) => {
+    try {
+      const res = await axios.put(`${API_URL}/admin/users/${userId}/premium`, { premium: !currentPremium });
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message);
+        fetchUsers();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Failed to toggle premium access.');
+      clearMessages();
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user and all their payment logs?')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/admin/users/${userId}`);
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message);
+        fetchUsers();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Failed to delete user.');
+      clearMessages();
+    }
+  };
+
+  // Handle Material Upload
+  const handleMaterialSubmit = async (e) => {
+    e.preventDefault();
+    if (!materialForm.title || !materialForm.description || !materialFile) {
+      setErrorMsg('Please fill in text fields and upload the material file.');
+      clearMessages();
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', materialForm.title);
+    formData.append('description', materialForm.description);
+    formData.append('category', materialForm.category);
+    formData.append('type', materialForm.type);
+    formData.append('accessType', materialForm.accessType);
+    formData.append('file', materialFile);
+    if (materialThumb) formData.append('thumbnail', materialThumb);
+
+    setActionLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await axios.post(`${API_URL}/materials`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data && res.data.success) {
+        setSuccessMsg('Study resource uploaded successfully!');
+        setMaterialForm({ title: '', description: '', category: 'SSC', type: 'pdf', accessType: 'free' });
+        setMaterialFile(null);
+        setMaterialThumb(null);
+        // Reset file inputs visually
+        document.getElementById('fileInput').value = '';
+        const thumbInput = document.getElementById('thumbInput');
+        if (thumbInput) thumbInput.value = '';
+        fetchMaterials();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.message || 'Failed to upload resource.');
+      clearMessages();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteMaterial = async (id) => {
+    if (!window.confirm('Delete this study resource? This deletes the file from storage.')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/materials/${id}`);
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message);
+        fetchMaterials();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Deletion failed.');
+      clearMessages();
+    }
+  };
+
+  // Handle Payments Claims Verification
+  const handleVerifyPayment = async (paymentId, status) => {
+    if (status === 'rejected' && !rejectReason) {
+      setActiveRejectId(paymentId);
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await axios.put(`${API_URL}/payments/admin/${paymentId}/verify`, {
+        status,
+        rejectReason: status === 'rejected' ? rejectReason : '',
+      });
+
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message);
+        setRejectReason('');
+        setActiveRejectId(null);
+        fetchPayments();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Failed to process payment claim verification.');
+      clearMessages();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle Notices announcements
+  const handleNoticeSubmit = async (e) => {
+    e.preventDefault();
+    if (!noticeForm.title || !noticeForm.content) {
+      setErrorMsg('Provide notice title and description.');
+      clearMessages();
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${API_URL}/notices`, noticeForm);
+      if (res.data && res.data.success) {
+        setSuccessMsg('Announcement broadcasted successfully!');
+        setNoticeForm({ title: '', content: '', target: 'all' });
+        fetchNotices();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Broadcasting failed.');
+      clearMessages();
+    }
+  };
+
+  const handleDeleteNotice = async (noticeId) => {
+    if (!window.confirm('Delete this announcement notice?')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/notices/${noticeId}`);
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message);
+        fetchNotices();
+        clearMessages();
+      }
+    } catch (err) {
+      setErrorMsg('Notice deletion failed.');
+      clearMessages();
+    }
+  };
+
+  return (
+    <div className="flex-1 px-4 py-8 max-w-7xl mx-auto space-y-6">
+      {/* Header Panel */}
+      <div className="border-b border-slate-100 dark:border-slate-800/60 pb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white font-sans tracking-tight">
+            Administrative Command Control
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">
+            Configure uploads, review receipts, broadcast announcements, and moderate users
+          </p>
+        </div>
+        <div className="flex items-center gap-1 text-xs font-bold text-premium-600 bg-premium-100 dark:bg-premium-900/40 dark:text-premium-300 px-3 py-1.5 rounded-xl">
+          <Shield className="h-4 w-4" />
+          SYSTEM ADMIN ACTIVE
+        </div>
+      </div>
+
+      {/* Toast Notification Container (React Toastify UI Mockup) */}
+      {(successMsg || errorMsg) && (
+        <div className="fixed top-4 right-4 z-50 space-y-3 max-w-sm w-full animate-scale-in">
+          {successMsg && (
+            <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-darkbg-200 border-l-4 border-emerald-500 p-4 shadow-2xl border border-slate-100 dark:border-slate-800 glass relative">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600">
+                <ShieldCheck className="h-4.5 w-4.5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[9px] uppercase font-bold tracking-widest text-slate-400">Success</p>
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 mt-0.5">{successMsg}</p>
+              </div>
+              <button onClick={() => setSuccessMsg('')} className="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none select-none">×</button>
+            </div>
+          )}
+          {errorMsg && (
+            <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-darkbg-200 border-l-4 border-rose-500 p-4 shadow-2xl border border-slate-100 dark:border-slate-800 glass relative">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-950/20 text-rose-600">
+                <AlertCircle className="h-4.5 w-4.5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[9px] uppercase font-bold tracking-widest text-slate-400">Alert</p>
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 mt-0.5">{errorMsg}</p>
+              </div>
+              <button onClick={() => setErrorMsg('')} className="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none select-none">×</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tabs list anchors */}
+      <div className="flex overflow-x-auto gap-2 border-b border-slate-200/50 pb-2 dark:border-slate-800/60">
+        {[
+          { id: 'stats', label: 'KPI Analytics', icon: DollarSign },
+          { id: 'users', label: 'Users Management', icon: Users },
+          { id: 'materials', label: 'Materials Library', icon: BookOpen },
+          { id: 'payments', label: 'Payment Approvals', icon: ShieldCheck, count: payments.length },
+          { id: 'notices', label: 'Broadcast Bulletin', icon: Megaphone },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all shrink-0 ${
+              activeTab === tab.id
+                ? 'bg-premium-500 text-white shadow-md shadow-premium-500/20'
+                : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+            }`}
+          >
+            <tab.icon className="h-4 w-4" />
+            {tab.label}
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className="rounded-full bg-rose-500 text-white text-[9px] px-1.5 py-0.5 animate-pulse ml-0.5">
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* TABS CONTAINER PANELS */}
+      {/* 1. Analytics tab */}
+      {activeTab === 'stats' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard title="Total Platform Users" value={stats.totalUsers} icon={Users} colorClass="bg-gradient-to-tr from-blue-500 to-indigo-600" />
+            <StatCard title="Premium Activations" value={stats.premiumUsers} icon={Sparkles} colorClass="bg-gradient-to-tr from-amber-500 to-orange-600" />
+            <StatCard title="Uploaded Resources" value={stats.totalMaterials} icon={BookOpen} colorClass="bg-gradient-to-tr from-purple-500 to-pink-600" />
+            <StatCard title="Overall UPI Revenue" value={`₹${stats.totalRevenue}`} icon={DollarSign} colorClass="bg-gradient-to-tr from-emerald-500 to-teal-600" />
+          </div>
+
+          {/* Visual Charts Grid (Recharts Framework Style SVGs) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Revenue Area Chart */}
+            <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/60">
+                <h3 className="font-extrabold text-xs sm:text-sm text-slate-700 dark:text-slate-300">Revenue Performance Trend</h3>
+                <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 px-2 py-0.5 rounded-full font-bold">MoM Growth +24%</span>
+              </div>
+              <div className="h-60 w-full relative pt-2">
+                <svg viewBox="0 0 500 200" className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.45" />
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Grid Lines */}
+                  <line x1="0" y1="40" x2="500" y2="40" stroke="#e2e8f0" strokeDasharray="3,3" className="dark:stroke-slate-800/60" />
+                  <line x1="0" y1="90" x2="500" y2="90" stroke="#e2e8f0" strokeDasharray="3,3" className="dark:stroke-slate-800/60" />
+                  <line x1="0" y1="140" x2="500" y2="140" stroke="#e2e8f0" strokeDasharray="3,3" className="dark:stroke-slate-800/60" />
+                  
+                  {/* Filled Gradient Area */}
+                  <path d="M 0 160 Q 100 135 200 95 T 400 45 T 500 15 L 500 160 L 0 160 Z" fill="url(#chartGradient)" />
+                  
+                  {/* Glowing Stroke Line */}
+                  <path d="M 0 160 Q 100 135 200 95 T 400 45 T 500 15" fill="none" stroke="#8b5cf6" strokeWidth="3" className="drop-shadow-[0_2px_8px_rgba(139,92,246,0.3)]" />
+                  
+                  {/* Coordinating Circles */}
+                  <circle cx="100" cy="135" r="4.5" fill="#8b5cf6" stroke="#ffffff" strokeWidth="1.5" className="animate-pulse" />
+                  <circle cx="200" cy="95" r="4.5" fill="#8b5cf6" stroke="#ffffff" strokeWidth="1.5" className="animate-pulse" />
+                  <circle cx="300" cy="70" r="4.5" fill="#8b5cf6" stroke="#ffffff" strokeWidth="1.5" className="animate-pulse" />
+                  <circle cx="400" cy="45" r="4.5" fill="#8b5cf6" stroke="#ffffff" strokeWidth="1.5" className="animate-pulse" />
+                  <circle cx="500" cy="15" r="4.5" fill="#8b5cf6" stroke="#ffffff" strokeWidth="1.5" className="animate-pulse" />
+                  
+                  {/* Month points */}
+                  <text x="100" y="185" textAnchor="middle" fontSize="9" fill="#94a3b8" className="font-bold">Jan</text>
+                  <text x="200" y="185" textAnchor="middle" fontSize="9" fill="#94a3b8" className="font-bold">Feb</text>
+                  <text x="300" y="185" textAnchor="middle" fontSize="9" fill="#94a3b8" className="font-bold">Mar</text>
+                  <text x="400" y="185" textAnchor="middle" fontSize="9" fill="#94a3b8" className="font-bold">Apr</text>
+                  <text x="500" y="185" textAnchor="middle" fontSize="9" fill="#94a3b8" className="font-bold">May</text>
+                </svg>
+              </div>
+            </div>
+
+            {/* Category distribution bar chart */}
+            <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/60">
+                <h3 className="font-extrabold text-xs sm:text-sm text-slate-700 dark:text-slate-300">Category-wise Materials</h3>
+                <span className="text-[10px] bg-purple-50 dark:bg-purple-950/20 text-purple-600 px-2 py-0.5 rounded-full font-bold">Distribution</span>
+              </div>
+              
+              <div className="h-60 w-full relative pt-2">
+                <svg viewBox="0 0 500 200" className="w-full h-full overflow-visible">
+                  {/* Base Line */}
+                  <line x1="20" y1="150" x2="480" y2="150" stroke="#e2e8f0" className="dark:stroke-slate-800/60" />
+                  
+                  {/* SSC Bar */}
+                  <rect x="50" y="45" width="28" height="105" rx="5" fill="url(#purpleBar)" className="transition-all hover:opacity-85" />
+                  <text x="64" y="170" textAnchor="middle" fontSize="8" fill="#94a3b8" className="font-bold">SSC</text>
+                  <text x="64" y="35" textAnchor="middle" fontSize="8" fill="#8b5cf6" className="font-bold">40%</text>
+
+                  {/* UPSC Bar */}
+                  <rect x="120" y="65" width="28" height="85" rx="5" fill="url(#indigoBar)" />
+                  <text x="134" y="170" textAnchor="middle" fontSize="8" fill="#94a3b8" className="font-bold">UPSC</text>
+                  <text x="134" y="55" textAnchor="middle" fontSize="8" fill="#6366f1" className="font-bold">30%</text>
+
+                  {/* Programming Bar */}
+                  <rect x="190" y="85" width="28" height="65" rx="5" fill="url(#pinkBar)" />
+                  <text x="204" y="170" textAnchor="middle" fontSize="8" fill="#94a3b8" className="font-bold">Programming</text>
+                  <text x="204" y="75" textAnchor="middle" fontSize="8" fill="#ec4899" className="font-bold">20%</text>
+
+                  {/* NEET/JEE Bar */}
+                  <rect x="260" y="105" width="28" height="45" rx="5" fill="url(#amberBar)" />
+                  <text x="274" y="170" textAnchor="middle" fontSize="8" fill="#94a3b8" className="font-bold">NEET/JEE</text>
+                  <text x="274" y="95" textAnchor="middle" fontSize="8" fill="#f59e0b" className="font-bold">15%</text>
+
+                  {/* Spoken English Bar */}
+                  <rect x="330" y="75" width="28" height="75" rx="5" fill="url(#emeraldBar)" />
+                  <text x="344" y="170" textAnchor="middle" fontSize="8" fill="#94a3b8" className="font-bold">English</text>
+                  <text x="344" y="65" textAnchor="middle" fontSize="8" fill="#10b981" className="font-bold">25%</text>
+
+                  {/* Gov Jobs Bar */}
+                  <rect x="400" y="55" width="28" height="95" rx="5" fill="url(#cyanBar)" />
+                  <text x="414" y="170" textAnchor="middle" fontSize="8" fill="#94a3b8" className="font-bold">Govt Jobs</text>
+                  <text x="414" y="45" textAnchor="middle" fontSize="8" fill="#06b6d4" className="font-bold">35%</text>
+                  
+                  {/* Defined Bar Gradient Fills */}
+                  <defs>
+                    <linearGradient id="purpleBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#c084fc" /><stop offset="100%" stopColor="#8b5cf6" />
+                    </linearGradient>
+                    <linearGradient id="indigoBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#818cf8" /><stop offset="100%" stopColor="#4f46e5" />
+                    </linearGradient>
+                    <linearGradient id="pinkBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f472b6" /><stop offset="100%" stopColor="#db2777" />
+                    </linearGradient>
+                    <linearGradient id="amberBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#d97706" />
+                    </linearGradient>
+                    <linearGradient id="emeraldBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#34d399" /><stop offset="100%" stopColor="#059669" />
+                    </linearGradient>
+                    <linearGradient id="cyanBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#0891b2" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick instructions alert */}
+          <div className="glass rounded-3xl p-5 border border-slate-200/50 dark:border-slate-800/50 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <h4 className="font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1.5 text-xs">
+              <ShieldAlert className="h-4 w-4 text-premium-500" />
+              Administrative Guidelines
+            </h4>
+            To test the full user-flow cycle, toggle the "Payment Approvals" tab to review receipts submitted by users. You can also elevate accounts to premium instantly in the "Users Management" list.
+          </div>
+        </div>
+      )}
+
+      {/* 2. Users management tab */}
+      {activeTab === 'users' && (
+        <div className="space-y-4">
+          {/* Search bar */}
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <Search className="h-4 w-4" />
+            </div>
+            <input
+              type="text"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              placeholder="Search user names, emails, mobile..."
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 text-xs sm:text-sm text-slate-800 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 focus:dark:bg-darkbg-100 transition-all"
+            />
+          </div>
+
+          <div className="glass border border-slate-200/50 dark:border-slate-800/50 rounded-3xl overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/20 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
+                  <th className="px-6 py-4">User Details</th>
+                  <th className="px-6 py-4">Mobile</th>
+                  <th className="px-6 py-4 text-center">Status</th>
+                  <th className="px-6 py-4 text-center">Premium Tier</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="p-4">
+                      <TableRowSkeleton />
+                      <TableRowSkeleton />
+                    </td>
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
+                      No matching user profiles found.
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((item) => (
+                    <tr
+                      key={item._id}
+                      className="border-b border-slate-100 last:border-0 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-700 dark:text-slate-300">{item.name}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{item.email}</div>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">{item.mobile}</td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => handleToggleStatus(item._id)}
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                            item.isActive
+                              ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600'
+                              : 'bg-rose-50 dark:bg-rose-950/20 text-rose-600'
+                          }`}
+                          title="Toggle Status (Activate/Deactivate)"
+                        >
+                          {item.isActive ? 'Active' : 'Banned'}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => handleTogglePremium(item._id, item.premium)}
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                            item.premium
+                              ? 'bg-amber-400 text-slate-900 premium-glow'
+                              : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
+                          }`}
+                          title="Toggle Premium membership manually"
+                        >
+                          {item.premium ? 'Premium' : 'Free'}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleDeleteUser(item._id)}
+                          className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
+                          title="Permanently remove user"
+                        >
+                          <Trash2 className="h-4.5 w-4.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Materials Upload & Management Tab */}
+      {activeTab === 'materials' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Upload Form Block */}
+          <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+            <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/40 pb-3">
+              <PlusCircle className="h-4.5 w-4.5 text-premium-500" />
+              Add Study Resource
+            </h3>
+
+            <form onSubmit={handleMaterialSubmit} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Resource Title</label>
+                <input
+                  type="text"
+                  value={materialForm.title}
+                  onChange={(e) => setMaterialForm({ ...materialForm, title: e.target.value })}
+                  placeholder="e.g. UPSC Prelims Indian Polity 2026"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Description</label>
+                <textarea
+                  value={materialForm.description}
+                  onChange={(e) => setMaterialForm({ ...materialForm, description: e.target.value })}
+                  placeholder="Summarize the study resource chapter guidelines..."
+                  rows="3"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Category</label>
+                  <select
+                    value={materialForm.category}
+                    onChange={(e) => setMaterialForm({ ...materialForm, category: e.target.value })}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-3 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 cursor-pointer"
+                  >
+                    {categories.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Resource Type</label>
+                  <select
+                    value={materialForm.type}
+                    onChange={(e) => setMaterialForm({ ...materialForm, type: e.target.value })}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-3 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 cursor-pointer"
+                  >
+                    <option value="pdf">PDF File</option>
+                    <option value="video">MP4 Video</option>
+                    <option value="zip">ZIP Archive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Access Tier</label>
+                <select
+                  value={materialForm.accessType}
+                  onChange={(e) => setMaterialForm({ ...materialForm, accessType: e.target.value })}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-3 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 cursor-pointer"
+                >
+                  <option value="free">Free Access</option>
+                  <option value="premium">Premium Access (🔒 Requires Unlock)</option>
+                </select>
+              </div>
+
+              {/* Upload Main resource file */}
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">
+                  Select Study File (Max 100MB)
+                </label>
+                <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-3 bg-slate-50/50 dark:bg-darkbg-100/30 text-center relative hover:border-premium-500 transition-colors">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    {materialFile ? (
+                      <span className="font-bold text-emerald-500 truncate block max-w-xs mx-auto">
+                        ✓ {materialFile.name}
+                      </span>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mx-auto text-slate-400 mb-1" />
+                        PDF / MP4 / ZIP
+                      </>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    id="fileInput"
+                    onChange={(e) => setMaterialFile(e.target.files[0])}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Upload thumbnail (optional) */}
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">
+                  Optional Thumbnail (Image)
+                </label>
+                <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-3 bg-slate-50/50 dark:bg-darkbg-100/30 text-center relative hover:border-premium-500 transition-colors">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    {materialThumb ? (
+                      <span className="font-bold text-emerald-500 truncate block max-w-xs mx-auto">
+                        ✓ {materialThumb.name}
+                      </span>
+                    ) : (
+                      <>
+                        <ImageIcon className="h-4 w-4 mx-auto text-slate-400 mb-1" />
+                        JPEG / PNG / WEBP
+                      </>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    id="thumbInput"
+                    accept="image/*"
+                    onChange={(e) => setMaterialThumb(e.target.files[0])}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={actionLoading}
+                className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-premium-500 py-3 text-xs font-bold text-white shadow-lg shadow-premium-500/25 hover:bg-premium-600 disabled:opacity-50 transition-all pt-3"
+              >
+                {actionLoading ? 'Uploading Resource...' : 'Upload Study Resource'}
+              </button>
+            </form>
+          </div>
+
+          {/* Existing materials lists */}
+          <div className="lg:col-span-2 glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+            <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 pb-3 border-b border-slate-100 dark:border-slate-800/40">
+              Manage Vault Contents
+            </h3>
+
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+              {loading ? (
+                <>
+                  <TableRowSkeleton />
+                  <TableRowSkeleton />
+                </>
+              ) : materials.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-10">No study assets uploaded yet.</p>
+              ) : (
+                materials.map((m) => (
+                  <div
+                    key={m._id}
+                    className="flex items-center justify-between gap-3 text-xs p-3 rounded-2xl border border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all"
+                  >
+                    <div className="flex items-center gap-3 truncate w-2/3">
+                      <div className="h-9 w-9 rounded-xl bg-slate-50 dark:bg-darkbg-100 flex items-center justify-center text-slate-500 shrink-0 border border-slate-100 dark:border-slate-800/30">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div className="truncate">
+                        <h4 className="font-bold text-slate-700 dark:text-slate-300 truncate">{m.title}</h4>
+                        <div className="flex gap-2 items-center text-[9px] text-slate-400 mt-0.5 uppercase font-medium">
+                          <span>{m.category}</span>
+                          <span>•</span>
+                          <span>{m.type}</span>
+                          <span>•</span>
+                          <span className={m.accessType === 'premium' ? 'text-amber-500 font-extrabold' : 'text-emerald-500 font-extrabold'}>
+                            {m.accessType}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleDeleteMaterial(m._id)}
+                        className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
+                        title="Delete resource"
+                      >
+                        <Trash2 className="h-4.5 w-4.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Payment Approval Management Tab */}
+      {activeTab === 'payments' && (
+        <div className="space-y-6">
+          <div className="glass border border-slate-200/50 dark:border-slate-800/50 rounded-3xl overflow-hidden">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/20 text-slate-400 font-bold uppercase tracking-wider text-[9px]">
+                  <th className="px-6 py-4">User Claim</th>
+                  <th className="px-6 py-4 text-center">Amount</th>
+                  <th className="px-6 py-4">Reference UTR</th>
+                  <th className="px-6 py-4 text-center">Receipt Screenshot</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="p-4">
+                      <TableRowSkeleton />
+                    </td>
+                  </tr>
+                ) : payments.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
+                      No pending payment requests needing verification.
+                    </td>
+                  </tr>
+                ) : (
+                  payments.map((item) => (
+                    <tr
+                      key={item._id}
+                      className="border-b border-slate-100 last:border-0 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-700 dark:text-slate-300">{item.userId?.name}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{item.userId?.email}</div>
+                        <div className="text-[9px] text-slate-400 font-bold mt-1 uppercase">Cell: {item.userId?.mobile}</div>
+                      </td>
+                      <td className="px-6 py-4 text-center font-bold text-slate-700 dark:text-slate-300">
+                        ₹{item.amount}
+                      </td>
+                      <td className="px-6 py-4 font-mono font-bold text-premium-600 dark:text-premium-400">
+                        {item.transactionId || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => setLightboxImage(item.screenshotUrl)}
+                          className="inline-flex items-center gap-1 rounded-xl bg-slate-50 dark:bg-darkbg-100 hover:bg-premium-100 dark:hover:bg-slate-800 p-1.5 border border-slate-200 dark:border-slate-800 transition-all font-bold text-[9px] text-slate-500 cursor-pointer"
+                        >
+                          <ImageIcon className="h-3.5 w-3.5" />
+                          View Receipt
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-1 shrink-0">
+                        {activeRejectId === item._id ? (
+                          <div className="flex flex-col gap-2 items-end">
+                            <input
+                              type="text"
+                              value={rejectReason}
+                              onChange={(e) => setRejectReason(e.target.value)}
+                              placeholder="Reason for rejection"
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[10px] w-48 text-slate-800 outline-none"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleVerifyPayment(item._id, 'rejected')}
+                                className="rounded-lg bg-rose-500 text-white px-3 py-1 text-[10px] font-bold"
+                              >
+                                Reject
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setActiveRejectId(null);
+                                  setRejectReason('');
+                                }}
+                                className="rounded-lg bg-slate-100 text-slate-500 px-3 py-1 text-[10px] font-bold"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end gap-1.5">
+                            <button
+                              onClick={() => handleVerifyPayment(item._id, 'approved')}
+                              className="rounded-lg bg-emerald-500 text-white p-2 hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/10"
+                              title="Approve Claims"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleVerifyPayment(item._id, 'rejected')}
+                              className="rounded-lg bg-rose-500 text-white p-2 hover:bg-rose-600 transition-all shadow-md shadow-rose-500/10"
+                              title="Reject Claims"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Announcements notices broadcast tab */}
+      {activeTab === 'notices' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Post Form */}
+          <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+            <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/40 pb-3">
+              <Megaphone className="h-4.5 w-4.5 text-premium-500" />
+              Write Announcement
+            </h3>
+
+            <form onSubmit={handleNoticeSubmit} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Notice Title</label>
+                <input
+                  type="text"
+                  value={noticeForm.title}
+                  onChange={(e) => setNoticeForm({ ...noticeForm, title: e.target.value })}
+                  placeholder="e.g. Schedule Update for SSC Prep"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Alert Content</label>
+                <textarea
+                  value={noticeForm.content}
+                  onChange={(e) => setNoticeForm({ ...noticeForm, content: e.target.value })}
+                  placeholder="Detail changes or study resources released..."
+                  rows="4"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Target Audience</label>
+                <select
+                  value={noticeForm.target}
+                  onChange={(e) => setNoticeForm({ ...noticeForm, target: e.target.value })}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-3 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 cursor-pointer"
+                >
+                  <option value="all">All Platform Users</option>
+                  <option value="free">Free Tier Users Only</option>
+                  <option value="premium">Premium Pass Holders Only</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-premium-500 py-3 text-xs font-bold text-white shadow-lg shadow-premium-500/25 hover:bg-premium-600 transition-all pt-3"
+              >
+                Broadcast Announcement
+              </button>
+            </form>
+          </div>
+
+          {/* Past notices */}
+          <div className="lg:col-span-2 glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+            <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 pb-3 border-b border-slate-100 dark:border-slate-800/40">
+              Broadcast Archive Logs
+            </h3>
+
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+              {loading ? (
+                <>
+                  <TableRowSkeleton />
+                </>
+              ) : notices.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-10">No notices broadcasted yet.</p>
+              ) : (
+                notices.map((n) => (
+                  <div
+                    key={n._id}
+                    className="flex items-start justify-between gap-3 text-xs p-3 rounded-2xl border border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all animate-scale-in"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <h4 className="font-bold text-slate-700 dark:text-slate-300">{n.title}</h4>
+                      <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">{n.content}</p>
+                      <div className="flex gap-2 items-center text-[9px] text-slate-400 mt-1 uppercase font-bold">
+                        <span>Group: {n.target}</span>
+                        <span>•</span>
+                        <span>Date: {new Date(n.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteNotice(n._id)}
+                      className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all shrink-0"
+                      title="Remove Notice"
+                    >
+                      <Trash2 className="h-4.5 w-4.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox popups for zooming receipts screenshot images */}
+      {lightboxImage && (
+        <div
+          onClick={() => setLightboxImage(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 cursor-pointer"
+        >
+          <div className="relative max-w-lg max-h-[85vh] rounded-3xl bg-white border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden glass p-2 flex flex-col justify-between">
+            <img
+              src={lightboxImage.startsWith('http') || lightboxImage.startsWith('/uploads') ? (lightboxImage.startsWith('http') ? lightboxImage : `http://localhost:5000${lightboxImage}`) : lightboxImage}
+              alt="Zoomed Payment Screenshot Receipt Claim"
+              className="rounded-2xl max-w-full max-h-[75vh] object-contain shadow-sm"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1557200134-90327ee9fafa?q=80&w=400&auto=format&fit=crop";
+              }}
+            />
+            <div className="text-center py-2 text-[10px] font-bold text-slate-400">
+              Click anywhere outside image to close preview
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

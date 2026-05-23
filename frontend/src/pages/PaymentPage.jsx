@@ -1,0 +1,293 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../context/AuthContext';
+import { QrCode, Upload, CheckCircle2, ShieldCheck, Sparkles, Smartphone, ArrowRight, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+export default function PaymentPage() {
+  const { user, refreshUser } = useAuth();
+  const [upiInfo, setUpiInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [screenshot, setScreenshot] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [transactionId, setTransactionId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already premium, redirect back to dashboard
+    if (user?.premium) {
+      navigate('/dashboard');
+    }
+
+    const fetchUPIInfo = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/payments/upi-info`);
+        if (res.data && res.data.success) {
+          setUpiInfo(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load UPI payment configurations:', err.message);
+        setError('Failed to load payment credentials. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUPIInfo();
+  }, [user, navigate]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size exceeds 5MB limit.');
+        return;
+      }
+      setScreenshot(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setError('');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!screenshot) {
+      setError('Please upload a screenshot of your payment receipt.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('screenshot', screenshot);
+    formData.append('transactionId', transactionId);
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const res = await axios.post(`${API_URL}/payments/unlock`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data && res.data.success) {
+        setSuccess(true);
+        refreshUser(); // Sync status locally
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 4000);
+      }
+    } catch (err) {
+      console.error('Payment upload failed:', err);
+      setError(err.response?.data?.message || 'Failed to submit payment verification claim.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-darkbg-100">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-premium-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className="max-w-md mx-auto my-16 px-6 text-center space-y-6 animate-scale-in">
+        <div className="flex h-20 w-20 mx-auto items-center justify-center rounded-3xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 premium-glow">
+          <CheckCircle2 className="h-12 w-12" />
+        </div>
+        <h2 className="text-2xl font-black text-slate-800 dark:text-white">Request Submitted!</h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+          Your payment receipt has been successfully uploaded. Our team is manually verifying the transaction details. You will be automatically redirected to your dashboard now.
+        </p>
+        <div className="pt-4">
+          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
+            <div className="h-full bg-emerald-500 animate-pulse w-full rounded-full transition-all duration-3000" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      {/* Header title */}
+      <div className="border-b border-slate-100 dark:border-slate-800 pb-6 text-center max-w-xl mx-auto">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/10 dark:bg-amber-400/20 px-3.5 py-1 text-xs font-bold text-amber-500 mb-3 premium-glow">
+          <Sparkles className="h-3.5 w-3.5 fill-amber-400" />
+          ₹50 Premium Vault Access
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white font-sans tracking-tight">
+          Unlock Premium Study Pro
+        </h1>
+        <p className="text-xs text-slate-400 mt-1 dark:text-slate-500">
+          Make a payment using any UPI method, upload receipt, and access premium materials immediately.
+        </p>
+      </div>
+
+      {error && (
+        <div className="max-w-2xl mx-auto flex items-start gap-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/20 p-4 border border-rose-100 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 text-xs leading-relaxed animate-scale-in">
+          <AlertCircle className="h-4.5 w-4.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Double Column Flow */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        {/* Left Column: QR scanner and Deep links */}
+        <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-6 flex flex-col items-center">
+          <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 text-center flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/40 w-full pb-3 justify-center">
+            <QrCode className="h-4.5 w-4.5 text-premium-500" />
+            Scan UPI QR Code to Pay
+          </h3>
+
+          {/* Dynamic real QR server endpoint */}
+          <div className="relative p-4 rounded-3xl bg-white border border-slate-100 shadow-inner flex items-center justify-center h-60 w-60">
+            {upiInfo ? (
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiInfo.qrCodePayload)}`}
+                alt="UPI Payment QR Code"
+                className="h-48 w-48 object-contain"
+              />
+            ) : (
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-premium-500 border-t-transparent" />
+            )}
+          </div>
+
+          <div className="text-center space-y-1">
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Amount to Pay: ₹{upiInfo?.amount || 50}
+            </p>
+            <p className="text-[10px] text-slate-400">
+              Merchant: {upiInfo?.merchantName || 'Premium Study Platform'}
+            </p>
+            <p className="text-[10px] text-slate-500 font-semibold bg-slate-100 dark:bg-slate-800/60 px-3 py-1 rounded-xl mt-2 inline-block">
+              UPI: {upiInfo?.upiId}
+            </p>
+          </div>
+
+          {/* Android App Deep links anchors */}
+          <div className="w-full space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800/40">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">
+              Or Open directly in Apps
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <a
+                href={upiInfo?.deepLinks.gpay}
+                className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 p-2.5 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30 transition-all group"
+              >
+                <Smartphone className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold text-slate-500 mt-1">GPay</span>
+              </a>
+              <a
+                href={upiInfo?.deepLinks.phonepe}
+                className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 p-2.5 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30 transition-all group"
+              >
+                <Smartphone className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold text-slate-500 mt-1">PhonePe</span>
+              </a>
+              <a
+                href={upiInfo?.deepLinks.paytm}
+                className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 p-2.5 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30 transition-all group"
+              >
+                <Smartphone className="h-5 w-5 text-cyan-500 group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold text-slate-500 mt-1">Paytm</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Screenshot receipt uploader and form */}
+        <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-5">
+          <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/40 pb-3">
+            <Upload className="h-4.5 w-4.5 text-premium-500" />
+            Upload Payment Receipt
+          </h3>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Screenshot file drop block */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
+                UPI Payment Receipt Screenshot (Max 5MB)
+              </label>
+              
+              <div className="relative rounded-2xl border-2 border-dashed border-slate-200 hover:border-premium-400 dark:border-slate-800/60 dark:hover:border-premium-500 transition-colors flex flex-col items-center justify-center py-6 px-4 bg-slate-50/50 dark:bg-darkbg-100/30">
+                {previewUrl ? (
+                  <div className="space-y-3 flex flex-col items-center">
+                    <img
+                      src={previewUrl}
+                      alt="Payment screenshot receipt preview"
+                      className="h-40 max-w-full rounded-xl object-contain border border-slate-200 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScreenshot(null);
+                        setPreviewUrl('');
+                      }}
+                      className="rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 px-2.5 py-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 transition-colors"
+                    >
+                      Remove receipt
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center space-y-2 cursor-pointer text-center">
+                    <div className="h-10 w-10 rounded-xl bg-premium-100 dark:bg-premium-900/40 text-premium-600 dark:text-premium-300 flex items-center justify-center">
+                      <ImageIcon className="h-5 w-5" />
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="font-bold text-premium-500 hover:underline">Click to upload</span> or drag receipt file
+                    </div>
+                    <span className="text-[9px] text-slate-400">Supports PNG, JPG, JPEG</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  style={{ display: previewUrl ? 'none' : 'block' }}
+                />
+              </div>
+            </div>
+
+            {/* Reference input field */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">
+                Transaction reference ID / UTR (Optional)
+              </label>
+              <input
+                type="text"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                placeholder="12-digit transaction ID"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 focus:dark:bg-darkbg-100 transition-all"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isSubmitting || !screenshot}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-premium-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-premium-500/25 hover:bg-premium-600 disabled:opacity-50 transition-all pt-3.5"
+            >
+              {isSubmitting ? 'Uploading Receipt...' : 'Request Premium Activation'}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </form>
+
+          {/* Secure transaction guarantee */}
+          <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 border-t border-slate-100 dark:border-slate-800/40 pt-4">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            SSL Secure 256-bit automated logs verification
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
