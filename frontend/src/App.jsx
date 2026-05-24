@@ -15,6 +15,7 @@ import AdminDashboard from './pages/AdminDashboard';
 // Components
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import BottomNavigation from './components/BottomNavigation';
 
 // Layout component wrapping logged-in dashboards
 function DashboardLayout() {
@@ -25,9 +26,10 @@ function DashboardLayout() {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-darkbg-100/40">
+        <main className="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-darkbg-100/40 pb-16 lg:pb-0">
           <Outlet />
         </main>
+        <BottomNavigation onOpenProfile={() => window.dispatchEvent(new Event('open-profile-modal'))} />
       </div>
     </div>
   );

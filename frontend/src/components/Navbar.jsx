@@ -29,6 +29,12 @@ export default function Navbar({ onToggleSidebar }) {
     fetchActiveNotices();
   }, [token, user?.premium]);
 
+  useEffect(() => {
+    const handleOpenProfile = () => setShowProfileModal(true);
+    window.addEventListener('open-profile-modal', handleOpenProfile);
+    return () => window.removeEventListener('open-profile-modal', handleOpenProfile);
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/');

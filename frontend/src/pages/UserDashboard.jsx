@@ -280,6 +280,43 @@ export default function UserDashboard() {
         </div>
       </div>
 
+      {/* Continue Watching / Continue Learning Section */}
+      <div className="glass rounded-3xl p-5 border border-slate-200/50 dark:border-slate-800/50 bg-gradient-to-r from-emerald-500/5 via-transparent to-transparent shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between animate-scale-in">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 shadow-md shadow-emerald-500/20 text-white animate-pulse">
+            <Play className="h-5 w-5 fill-white ml-0.5" />
+          </div>
+          <div>
+            <span className="inline-block rounded-md bg-emerald-100 dark:bg-emerald-950/40 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-emerald-600 dark:text-emerald-450">
+              Continue Watching (અભ્યાસ ચાલુ રાખો)
+            </span>
+            <h4 className="font-extrabold text-sm text-slate-800 dark:text-white mt-1">
+              ગુજરાતી વ્યાકરણ - સંધિ જોડો અને છોડો (Class 3)
+            </h4>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+              Subject: Gujarati Grammer | Left off: 14 mins remaining
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full sm:w-auto flex items-center justify-between gap-4 shrink-0">
+          {/* Mock Progress Bar */}
+          <div className="flex-1 sm:w-28 text-right space-y-1">
+            <span className="text-[10px] font-bold text-emerald-500">72% Completed</span>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden shadow-inner">
+              <div className="bg-emerald-500 h-full rounded-full" style={{ width: '72%' }} />
+            </div>
+          </div>
+
+          <Link
+            to="/materials"
+            className="flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-4 py-2 text-[11px] font-bold text-slate-700 dark:text-slate-200 transition-all border border-slate-250 dark:border-slate-700 shadow-sm"
+          >
+            Resume Lesson
+          </Link>
+        </div>
+      </div>
+
       {/* Analytics KPI metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard
