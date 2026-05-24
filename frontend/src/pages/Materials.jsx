@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth, API_URL, SERVER_URL } from '../context/AuthContext';
 import AdBanner from '../components/AdBanner';
 import { CardSkeleton } from '../components/SkeletonLoader';
-import { Search, Filter, Play, Download, Lock, FileText, FolderArchive, Film, ExternalLink, Sparkles, X, Star, Eye } from 'lucide-react';
+import { Search, Filter, Play, Download, Lock, FileText, FolderArchive, Film, ExternalLink, Sparkles, X, Star, Eye, BookOpen, Languages, Percent, FlaskConical, Binary, Atom, Brain, GraduationCap, Lightbulb, Calculator, Globe, FolderOpen } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Materials() {
@@ -16,6 +16,22 @@ export default function Materials() {
   const [activeVideo, setActiveVideo] = useState(null); // Holds item details when modal is visible
   const [activePdf, setActivePdf] = useState(null);
   const [bookmarks, setBookmarks] = useState(JSON.parse(localStorage.getItem('bookmarks') || '[]'));
+  const [activeTab, setActiveTab] = useState('free'); // 'free' or 'premium'
+
+  const categoryConfigs = {
+    'Gujarati Grammer': { icon: BookOpen, color: 'from-orange-500 to-rose-600' },
+    'English Grammer': { icon: Languages, color: 'from-blue-500 to-indigo-600' },
+    'Std 9 Maths': { icon: Percent, color: 'from-emerald-500 to-teal-600' },
+    'Std 9 Science': { icon: FlaskConical, color: 'from-purple-500 to-pink-600' },
+    'Std 10 Maths': { icon: Binary, color: 'from-cyan-500 to-blue-600' },
+    'Std 10 Science': { icon: Atom, color: 'from-rose-500 to-red-600' },
+    'Manovigyan': { icon: Brain, color: 'from-violet-500 to-purple-600' },
+    'Pedagogy': { icon: GraduationCap, color: 'from-fuchsia-500 to-pink-600' },
+    'Reasoning': { icon: Lightbulb, color: 'from-amber-500 to-orange-600' },
+    'Maths': { icon: Calculator, color: 'from-teal-500 to-emerald-600' },
+    'GK': { icon: Globe, color: 'from-sky-500 to-blue-600' },
+    'Others': { icon: FolderOpen, color: 'from-slate-500 to-slate-600' }
+  };
   const navigate = useNavigate();
 
   const toggleBookmark = (item) => {
@@ -126,6 +142,10 @@ export default function Materials() {
     }
   };
 
+  const filteredMaterials = materials.filter((item) => {
+    return item.accessType === activeTab;
+  });
+
   return (
     <div className="flex-1 px-4 py-8 max-w-7xl mx-auto space-y-6">
       {/* Top Header Banner */}
@@ -150,8 +170,8 @@ export default function Materials() {
       {/* Conditionally displays advertisements for free members */}
       <AdBanner position="top" />
 
-      {/* Search and Filters Drawer */}
-      <div className="glass rounded-3xl p-5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col md:flex-row gap-4 items-center">
+      {/* Search and File Type Filter Row */}
+      <div className="glass rounded-3xl p-4 border border-slate-200/50 dark:border-slate-800/50 flex flex-col md:flex-row gap-4 items-center">
         {/* Search */}
         <div className="relative w-full md:flex-1">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -161,26 +181,9 @@ export default function Materials() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search material titles..."
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 focus:dark:bg-darkbg-100/80 transition-all"
+            placeholder="Search within this subject..."
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 focus:dark:bg-darkbg-100/80 transition-all"
           />
-        </div>
-
-        {/* Categories Select */}
-        <div className="relative w-full md:w-48 shrink-0">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <Filter className="h-4 w-4" />
-          </div>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-8 text-xs sm:text-sm text-slate-700 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 focus:dark:bg-darkbg-100/80 transition-all cursor-pointer"
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
         </div>
 
         {/* Types Select */}
@@ -191,7 +194,7 @@ export default function Materials() {
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-8 text-xs sm:text-sm text-slate-700 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 focus:dark:bg-darkbg-100/80 transition-all cursor-pointer"
+            className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-8 text-xs sm:text-sm text-slate-700 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 focus:dark:bg-darkbg-100/80 transition-all cursor-pointer"
           >
             <option value="">All File Types</option>
             <option value="pdf">PDFs</option>
@@ -201,6 +204,71 @@ export default function Materials() {
         </div>
       </div>
 
+      {/* Tactile Subject Selector Badge Grid */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center px-1">
+          <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Select Subject (વિષય પસંદ કરો)</p>
+          {category && (
+            <button
+              onClick={() => setCategory('')}
+              className="text-[10px] text-premium-500 font-extrabold hover:underline"
+            >
+              Clear Subject Filter
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth">
+          {categories.map((c) => {
+            const config = categoryConfigs[c] || { icon: FileText, color: 'from-slate-400 to-slate-500' };
+            const Icon = config.icon;
+            const isSelected = category === c;
+
+            return (
+              <button
+                key={c}
+                onClick={() => setCategory(isSelected ? '' : c)}
+                className={`flex items-center gap-2.5 rounded-2xl px-4 py-2.5 text-xs font-black shrink-0 transition-all shadow-sm border ${
+                  isSelected
+                    ? `bg-gradient-to-tr ${config.color} text-white border-transparent shadow-md shadow-slate-900/10`
+                    : 'bg-white text-slate-600 border-slate-200/60 hover:bg-slate-50 dark:bg-darkbg-200 dark:border-slate-800 dark:text-slate-350'
+                }`}
+              >
+                <div className={`flex h-5 w-5 items-center justify-center rounded-lg ${isSelected ? 'bg-white/20' : 'text-slate-400'}`}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                {c}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Free vs Paid Toggle Tab Bar */}
+      <div className="flex rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800/60 max-w-md mx-auto border border-slate-200/40 dark:border-slate-800/40 glass">
+        <button
+          onClick={() => setActiveTab('free')}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-black transition-all ${
+            activeTab === 'free'
+              ? 'bg-white text-slate-800 shadow-sm dark:bg-darkbg-200 dark:text-white border border-slate-200/45 dark:border-slate-800/45'
+              : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-300'
+          }`}
+        >
+          <Sparkles className="h-4 w-4 text-emerald-500 fill-emerald-500 animate-pulse" />
+          Free Materials (મુક્ત)
+        </button>
+        <button
+          onClick={() => setActiveTab('premium')}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-black transition-all ${
+            activeTab === 'premium'
+              ? 'bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-900 shadow-sm border border-amber-300'
+              : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-300'
+          }`}
+        >
+          <Lock className="h-4 w-4 text-slate-900 fill-slate-900" />
+          Paid / Premium (🔒)
+        </button>
+      </div>
+
       {/* Grid Display */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -208,17 +276,19 @@ export default function Materials() {
           <CardSkeleton />
           <CardSkeleton />
         </div>
-      ) : materials.length === 0 ? (
+      ) : filteredMaterials.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl space-y-3 bg-white dark:bg-transparent">
-          <FileText className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600" />
-          <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm">No Materials Found</h3>
+          <FileText className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 animate-pulse" />
+          <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm">
+            No {activeTab === 'free' ? 'Free' : 'Premium'} Materials Found
+          </h3>
           <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            Try adjusting your search filters or check back later for recent uploads.
+            There are no {activeTab === 'free' ? 'free resources' : 'premium locks'} matching your search in this category yet.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {materials.map((item) => {
+          {filteredMaterials.map((item) => {
             const isLocked = item.accessType === 'premium' && !isPremium && !isAdmin;
 
             return (
