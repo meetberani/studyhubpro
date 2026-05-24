@@ -9,20 +9,20 @@ export default function BottomNavigation({ onOpenProfile }) {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-45 mx-auto max-w-md rounded-2xl border border-slate-200/50 bg-white/80 p-2 shadow-xl backdrop-blur-md dark:border-slate-800/50 dark:bg-darkbg-200/80 lg:hidden glass transition-all select-none">
-      <nav className="flex items-center justify-around">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-45 w-[92%] max-w-sm rounded-full border border-slate-200/50 bg-white/80 p-1.5 shadow-xl backdrop-blur-md dark:border-slate-800/50 dark:bg-darkbg-200/80 lg:hidden glass transition-all select-none">
+      <nav className="grid grid-cols-4 items-center justify-center text-center">
         {/* 1. Dashboard */}
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center rounded-xl p-2 text-[10px] font-bold transition-all ${
+            `flex flex-col items-center justify-center rounded-2xl p-1.5 text-[9px] font-black transition-all ${
               isActive
-                ? 'text-premium-500 scale-105'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-250'
+                ? 'text-premium-500 scale-[1.03] bg-premium-50/50 dark:bg-premium-950/20'
+                : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-200'
             }`
           }
         >
-          <LayoutDashboard className="h-5 w-5 mb-0.5" />
+          <LayoutDashboard className="h-4.5 w-4.5 mb-0.5" />
           Home
         </NavLink>
 
@@ -30,14 +30,14 @@ export default function BottomNavigation({ onOpenProfile }) {
         <NavLink
           to="/materials"
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center rounded-xl p-2 text-[10px] font-bold transition-all ${
+            `flex flex-col items-center justify-center rounded-2xl p-1.5 text-[9px] font-black transition-all ${
               isActive
-                ? 'text-premium-500 scale-105'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-250'
+                ? 'text-premium-500 scale-[1.03] bg-premium-50/50 dark:bg-premium-950/20'
+                : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-200'
             }`
           }
         >
-          <BookOpen className="h-5 w-5 mb-0.5" />
+          <BookOpen className="h-4.5 w-4.5 mb-0.5" />
           Study
         </NavLink>
 
@@ -46,33 +46,33 @@ export default function BottomNavigation({ onOpenProfile }) {
           <NavLink
             to="/admin"
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center rounded-xl p-2 text-[10px] font-bold transition-all ${
+              `flex flex-col items-center justify-center rounded-2xl p-1.5 text-[9px] font-black transition-all ${
                 isActive
-                  ? 'text-premium-500 scale-105'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-250'
+                  ? 'text-premium-500 scale-[1.03] bg-premium-50/50 dark:bg-premium-950/20'
+                  : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-200'
               }`
             }
           >
-            <Shield className="h-5 w-5 mb-0.5" />
+            <Shield className="h-4.5 w-4.5 mb-0.5" />
             Admin
           </NavLink>
         ) : !isPremium ? (
           <NavLink
             to="/payment"
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center rounded-xl p-2 text-[10px] font-bold transition-all ${
+              `flex flex-col items-center justify-center rounded-2xl p-1.5 text-[9px] font-black transition-all ${
                 isActive
-                  ? 'text-amber-500 scale-105 premium-glow'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-250'
+                  ? 'text-amber-500 scale-[1.03] bg-amber-50/50 dark:bg-amber-950/25 premium-glow'
+                  : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-200'
               }`
             }
           >
-            <CreditCard className="h-5 w-5 mb-0.5 text-amber-500" />
+            <CreditCard className="h-4.5 w-4.5 mb-0.5 text-amber-500 animate-pulse" />
             Premium
           </NavLink>
         ) : (
-          <div className="flex flex-col items-center justify-center p-2 text-[10px] font-bold text-amber-500 shrink-0 select-none">
-            <CreditCard className="h-5 w-5 mb-0.5 text-amber-500" />
+          <div className="flex flex-col items-center justify-center p-1.5 text-[9px] font-black text-amber-500 select-none scale-[1.03]">
+            <CreditCard className="h-4.5 w-4.5 mb-0.5 text-amber-500" />
             Unlocked
           </div>
         )}
@@ -80,9 +80,9 @@ export default function BottomNavigation({ onOpenProfile }) {
         {/* 4. Profile Modal Trigger */}
         <button
           onClick={onOpenProfile}
-          className="flex flex-col items-center justify-center rounded-xl p-2 text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-250 transition-all focus:outline-none"
+          className="flex flex-col items-center justify-center rounded-2xl p-1.5 text-[9px] font-black text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 transition-all focus:outline-none"
         >
-          <User className="h-5 w-5 mb-0.5" />
+          <User className="h-4.5 w-4.5 mb-0.5" />
           Profile
         </button>
       </nav>

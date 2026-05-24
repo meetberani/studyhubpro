@@ -43,21 +43,30 @@ export default function Navbar({ onToggleSidebar }) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/80 backdrop-blur-md dark:border-slate-800/50 dark:bg-darkbg-100/80 transition-colors">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-        {/* Left Section: Branding & Mobile Sidebar Toggle */}
         <div className="flex items-center gap-3">
+          {user && (
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-premium-500 to-indigo-600 text-white font-extrabold text-sm shadow-md hover:scale-105 transition-all focus:outline-none ring-2 ring-premium-500/20"
+              title="View Profile Details"
+            >
+              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </button>
+          )}
+
           <button
             onClick={onToggleSidebar}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 focus:outline-none dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden"
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 focus:outline-none dark:text-slate-400 dark:hover:bg-slate-800 hidden lg:block"
             aria-label="Toggle Sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>
           
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-premium-500 to-indigo-600 shadow-md text-white font-bold text-xl">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-premium-500 to-indigo-600 shadow-md text-white font-bold text-xl hidden sm:flex">
               A
             </div>
-            <span className="hidden font-sans font-bold text-lg sm:block bg-gradient-to-r from-premium-600 to-indigo-600 dark:from-premium-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            <span className="font-sans font-bold text-base sm:text-lg bg-gradient-to-r from-premium-600 to-indigo-600 dark:from-premium-400 dark:to-indigo-400 bg-clip-text text-transparent">
               StudyPro
             </span>
           </Link>
@@ -142,16 +151,20 @@ export default function Navbar({ onToggleSidebar }) {
                 </Link>
               )}
 
-              {/* User Profile Avatar Button */}
-              <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-3">
-                <button
-                  onClick={() => setShowProfileModal(true)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-premium-500 to-indigo-600 text-white font-extrabold text-sm shadow-md hover:scale-105 transition-all focus:outline-none ring-2 ring-premium-500/20"
-                  title="View Profile Details"
+              {/* User Premium Status Badge */}
+              {isPremium ? (
+                <div className="hidden sm:flex items-center gap-1 rounded-full bg-amber-400/10 dark:bg-amber-400/20 border border-amber-400/30 px-3 py-1 text-xs font-bold text-amber-500 premium-glow">
+                  <Star className="h-3.5 w-3.5 fill-amber-400" />
+                  Premium
+                </div>
+              ) : (
+                <Link
+                  to="/payment"
+                  className="hidden sm:flex items-center gap-1 rounded-full bg-premium-500 px-3 py-1 text-xs font-bold text-white hover:bg-premium-600 transition-all shadow-md shadow-premium-500/20"
                 >
-                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </button>
-              </div>
+                  Go Premium
+                </Link>
+              )}
             </>
           )}
         </div>
@@ -228,8 +241,33 @@ export default function Navbar({ onToggleSidebar }) {
                 </div>
               </div>
 
+              {/* Help & Support Contact Section */}
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/40 p-4 border border-slate-100 dark:border-slate-800/60 space-y-3">
+                <h4 className="font-bold text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-450">
+                  મદદ અને સજેશન (Help & Suggestions)
+                </h4>
+                
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <a
+                    href="tel:9727353339"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white dark:bg-darkbg-100/50 p-2.5 border border-slate-200/60 dark:border-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors shadow-sm"
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white text-[10px]">📞</span>
+                    Admin: 9727353339
+                  </a>
+                  
+                  <a
+                    href="mailto:meetberani78@gmail.com"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white dark:bg-darkbg-100/50 p-2.5 border border-slate-200/60 dark:border-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors shadow-sm"
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-white text-[10px]">✉️</span>
+                    App Feedback
+                  </a>
+                </div>
+              </div>
+
               {/* Action Buttons */}
-              <div className="space-y-3 pt-3">
+              <div className="space-y-3 pt-1">
                 {!isPremium && user.role !== 'admin' && (
                   <Link
                     to="/payment"
@@ -245,7 +283,7 @@ export default function Navbar({ onToggleSidebar }) {
                     setShowProfileModal(false);
                     handleLogout();
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50/50 py-3 text-center text-xs font-extrabold text-rose-600 dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/30 transition-all"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-250 bg-rose-50/50 py-3 text-center text-xs font-extrabold text-rose-600 dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-400 hover:bg-rose-105 dark:hover:bg-rose-950/30 transition-all"
                 >
                   <LogOut className="h-4 w-4" /> Sign Out from StudyPro
                 </button>

@@ -136,21 +136,42 @@ export default function UserDashboard() {
   }, []);
 
   const getStatusBanner = () => {
+    const bannerImg = "/study_banner.png";
+
     if (isPremium) {
       return (
-        <div className="rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-600 p-6 text-white shadow-lg shadow-amber-500/15 border border-amber-400/20 premium-glow animate-scale-in">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1.5 text-center sm:text-left">
-              <span className="inline-block rounded-full bg-white/25 px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-yellow-100 animate-pulse">
-                Lifetime Premium
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black font-sans tracking-tight">You have Full Vault Access</h2>
-              <p className="text-xs text-amber-50 font-medium">
-                Ad-free streaming, direct PDF downloads, and complete category coverage unlocked.
+        <div className="rounded-3xl bg-gradient-to-tr from-premium-500 via-indigo-600 to-indigo-700 text-white shadow-xl shadow-premium-500/10 border border-premium-400/25 overflow-hidden animate-scale-in relative">
+          <div className="absolute inset-0 bg-grid-white/[0.03] bg-[size:16px_16px]" />
+          <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-6 p-6 sm:p-8 relative z-10">
+            <div className="md:col-span-3 space-y-3.5 text-center md:text-left">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1 text-[10px] font-black text-slate-900 shadow-md premium-glow animate-pulse">
+                <Sparkles className="h-3.5 w-3.5 fill-slate-900" />
+                SS STUDY - PREMIUM USER
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black font-sans tracking-tight leading-tight">
+                અભ્યાસ મટીરીયલ અને વિડીયો લેક્ચર્સ
+              </h2>
+              <p className="text-xs sm:text-sm text-indigo-105 font-medium leading-relaxed max-w-xl">
+                તમારા ઉજ્જવળ ભવિષ્ય તરફ એક ડગલું. ધોરણ 9-10 અને સરકારી પરીક્ષાઓ માટેનું તમામ પ્રીમિયમ સાહિત્ય સફળતાપૂર્વક અનલોક કરેલ છે.
               </p>
+              <div className="pt-2 flex flex-wrap justify-center md:justify-start gap-2.5">
+                <Link
+                  to="/materials"
+                  className="rounded-2xl bg-white px-5 py-3 text-xs font-black text-premium-600 shadow-md hover:bg-slate-50 hover:-translate-y-0.5 transition-all"
+                >
+                  સ્ટડી મટીરીયલ જુઓ (Browse Study)
+                </Link>
+              </div>
             </div>
-            <div className="h-16 w-16 shrink-0 flex items-center justify-center rounded-2xl bg-white/20 text-white animate-bounce">
-              <Sparkles className="h-10 w-10 fill-white text-yellow-200" />
+            <div className="md:col-span-2 flex justify-center items-center">
+              <div className="relative group max-w-[240px] md:max-w-full">
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 to-indigo-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition-opacity" />
+                <img
+                  src={bannerImg}
+                  alt="Study Illustration"
+                  className="relative rounded-2xl shadow-lg border border-white/10 max-h-40 md:max-h-48 object-cover transform hover:scale-[1.03] transition-transform duration-500"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -159,16 +180,26 @@ export default function UserDashboard() {
 
     if (user?.paymentStatus === 'pending') {
       return (
-        <div className="rounded-3xl bg-gradient-to-tr from-amber-400/90 to-amber-500 p-6 text-white shadow-lg border border-amber-300/30 animate-scale-in">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white">
-              <Clock className="h-6 w-6 animate-spin" />
-            </div>
-            <div className="space-y-1">
-              <h2 className="text-base sm:text-lg font-extrabold">Payment Verification Pending</h2>
-              <p className="text-xs text-amber-50 leading-relaxed">
-                We have received your ₹50 transaction screenshot receipt. An administrator is currently validating your payment. Your premium membership will activate automatically once approved (typically within 1-2 hours).
+        <div className="rounded-3xl bg-gradient-to-tr from-slate-800 to-slate-900 text-white shadow-xl border border-slate-700/50 overflow-hidden animate-scale-in relative">
+          <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-6 p-6 sm:p-8 relative z-10">
+            <div className="md:col-span-3 space-y-3.5 text-center md:text-left">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/35 px-3 py-1 text-[10px] font-black text-amber-400">
+                <Clock className="h-3.5 w-3.5 animate-spin" />
+                ચકાસણી ચાલુ છે (VERIFICATION PENDING)
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                પેમેન્ટ વેરિફિકેશન પ્રક્રિયામાં છે
+              </h2>
+              <p className="text-xs text-slate-350 leading-relaxed max-w-xl">
+                અમને તમારી ₹50 ટ્રાન્ઝેક્શન સ્ક્રીનશોટ રસીદ મળી છે. એડમિનિસ્ટ્રેટર હાલમાં તેની ચકાસણી કરી રહ્યા છે. આગામી 1-2 કલાકમાં પ્રીમિયમ સેવાઓ સક્રિય થઈ જશે.
               </p>
+            </div>
+            <div className="md:col-span-2 flex justify-center items-center">
+              <img
+                src={bannerImg}
+                alt="Study Illustration"
+                className="rounded-2xl shadow-lg border border-slate-700/30 max-h-36 object-cover opacity-60 filter grayscale"
+              />
             </div>
           </div>
         </div>
@@ -177,25 +208,35 @@ export default function UserDashboard() {
 
     if (user?.paymentStatus === 'rejected') {
       return (
-        <div className="rounded-3xl bg-gradient-to-tr from-rose-500 to-rose-600 p-6 text-white shadow-lg border border-rose-400/20 animate-scale-in">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white">
-              <XCircle className="h-6 w-6 animate-pulse" />
-            </div>
-            <div className="space-y-2 flex-1">
-              <h2 className="text-base sm:text-lg font-extrabold">Payment Claim Rejected</h2>
-              <p className="text-xs text-rose-50 leading-relaxed">
-                Your previous payment upload request was rejected by an administrator. Please check that you uploaded the correct UPI transfer receipt showing the Transaction Reference ID (UTR).
+        <div className="rounded-3xl bg-gradient-to-tr from-rose-950 via-slate-900 to-slate-950 text-white shadow-xl border border-rose-800/30 overflow-hidden animate-scale-in relative">
+          <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-6 p-6 sm:p-8 relative z-10">
+            <div className="md:col-span-3 space-y-3.5 text-center md:text-left">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 px-3 py-1 text-[10px] font-black text-rose-400">
+                <XCircle className="h-3.5 w-3.5 animate-pulse" />
+                અસ્વીકાર થયેલ છે (CLAIM REJECTED)
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                પેમેન્ટ સ્ક્રીનશોટ અસ્વીકાર કરવામાં આવ્યો છે
+              </h2>
+              <p className="text-xs text-rose-200/85 leading-relaxed max-w-xl">
+                તમારી અગાઉની રસીદ એડમિન દ્વારા અસ્વીકાર કરવામાં આવી છે. કૃપા કરીને ખાતરી કરો કે તમે UTR નંબર ધરાવતો સાચો સ્ક્રીનશોટ અપલોડ કર્યો છે.
               </p>
-              <div className="mt-2 pt-2 border-t border-white/10">
+              <div className="pt-2">
                 <Link
                   to="/payment"
-                  className="inline-flex items-center gap-1 text-xs font-black underline hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-2xl bg-rose-500 hover:bg-rose-600 px-5 py-3 text-xs font-black text-white shadow-md hover:-translate-y-0.5 transition-all"
                 >
-                  Upload New Receipt screenshot
+                  નવો સ્ક્રીનશોટ અપલોડ કરો
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
+            </div>
+            <div className="md:col-span-2 flex justify-center items-center">
+              <img
+                src={bannerImg}
+                alt="Study Illustration"
+                className="rounded-2xl shadow-lg border border-rose-800/20 max-h-36 object-cover opacity-50 filter saturate-50"
+              />
             </div>
           </div>
         </div>
@@ -203,24 +244,38 @@ export default function UserDashboard() {
     }
 
     return (
-      <div className="rounded-3xl bg-gradient-to-tr from-premium-500 to-indigo-600 p-6 text-white shadow-lg border border-premium-400/20 animate-scale-in relative overflow-hidden">
-        <div className="absolute -top-12 -right-12 h-32 w-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
-          <div className="space-y-1.5 text-center sm:text-left">
-            <span className="inline-block rounded-full bg-white/25 px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-purple-100">
-              Basic Membership
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">Unlock All Syllabus Materials</h2>
-            <p className="text-xs text-purple-50">
-              Pay ₹50 once using UPI methods to download premium templates and disable advertisements.
+      <div className="rounded-3xl bg-gradient-to-tr from-premium-500 via-indigo-600 to-indigo-700 text-white shadow-xl border border-premium-400/25 overflow-hidden animate-scale-in relative">
+        <div className="absolute inset-0 bg-grid-white/[0.03] bg-[size:16px_16px]" />
+        <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-6 p-6 sm:p-8 relative z-10">
+          <div className="md:col-span-3 space-y-3.5 text-center md:text-left">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/50 border border-indigo-400/40 px-3 py-1 text-[10px] font-black text-white">
+              SS STUDY - PREMIUM LEARNING
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+              ધોરણ 9-10 અને સરકારી પરીક્ષાની શ્રેષ્ઠ તૈયારી
+            </h2>
+            <p className="text-xs sm:text-sm text-indigo-105 leading-relaxed max-w-xl">
+              નમસ્તે, તમારા ઉજ્જવળ ભવિષ્ય અને શ્રેષ્ઠ તૈયારી માટે આજે જ જોડાવ. માત્ર ₹50 ચૂકવીને આજીવન તમામ મટીરીયલ્સ ડાઉનલોડ કરો.
             </p>
+            <div className="pt-2 flex flex-wrap justify-center md:justify-start gap-2.5">
+              <Link
+                to="/payment"
+                className="rounded-2xl bg-amber-400 px-5 py-3 text-xs font-black text-slate-900 shadow-md hover:bg-amber-305 hover:-translate-y-0.5 transition-all premium-glow animate-pulse"
+              >
+                પ્રીમિયમ સભ્ય બનો (₹50 માત્ર)
+              </Link>
+            </div>
           </div>
-          <Link
-            to="/payment"
-            className="flex items-center gap-1 rounded-2xl bg-white px-5 py-3 text-xs font-black text-premium-600 shadow-md hover:bg-slate-50 hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center shrink-0"
-          >
-            Unlock Now (₹50)
-          </Link>
+          <div className="md:col-span-2 flex justify-center items-center">
+            <div className="relative group max-w-[240px] md:max-w-full">
+              <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 to-indigo-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition-opacity" />
+              <img
+                src={bannerImg}
+                alt="Study Illustration"
+                className="relative rounded-2xl shadow-lg border border-white/10 max-h-40 md:max-h-48 object-cover transform hover:scale-[1.03] transition-transform duration-500"
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
