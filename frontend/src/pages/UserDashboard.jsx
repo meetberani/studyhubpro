@@ -1280,7 +1280,8 @@ export default function UserDashboard() {
             return true; // Relative paths are local
           }
         })();
-        const iframeSrc = isLocalUrl ? pdfUrl : `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+        // Load the PDF directly for absolute universal access (no external Google rate-limits or blocks)
+        const iframeSrc = pdfUrl;
 
         return (
           <div className={isPdfFullScreen ? "fixed inset-0 z-50 bg-white dark:bg-darkbg-200 flex flex-col justify-between animate-scale-in" : "fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-2 sm:p-4 animate-scale-in"}>
