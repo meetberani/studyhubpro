@@ -478,11 +478,35 @@ export default function Materials() {
 
       {/* In-App PDF Reader Modal */}
       {activePdf && (() => {
+        // Guard: if fileUrl is locked/invalid, close the modal
+        if (!activePdf.fileUrl || activePdf.fileUrl === '#locked') {
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-scale-in">
+              <div className="bg-white dark:bg-darkbg-200 rounded-3xl p-8 max-w-md text-center shadow-2xl">
+                <Lock className="h-12 w-12 text-premium-500 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">Premium Content</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">This document requires a premium subscription to view.</p>
+                <div className="flex gap-3 justify-center">
+                  <button onClick={() => { setActivePdf(null); setIsPdfFullScreen(false); }} className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold">Close</button>
+                  <Link to="/payment" className="px-4 py-2 rounded-xl bg-premium-500 text-white text-sm font-bold">Upgrade</Link>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
         const pdfUrl = activePdf.fileUrl.startsWith('http') || activePdf.fileUrl.startsWith('/uploads')
           ? (activePdf.fileUrl.startsWith('http') ? activePdf.fileUrl : `${SERVER_URL}${activePdf.fileUrl}`)
           : activePdf.fileUrl;
-        // Use Google Docs Viewer cloud proxy universally to guarantee inline mobile/desktop rendering stability
-        const iframeSrc = `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+
+        // Determine if the PDF is hosted locally (dev uploads) or on a public CDN (Cloudinary etc.)
+        const isLocalUrl = pdfUrl.includes('localhost') || pdfUrl.startsWith('/uploads');
+
+        // Use direct URL for public/Cloudinary PDFs; use Google Docs Viewer only for local dev uploads
+        // Google gview requires a publicly accessible URL — fails for localhost and private servers
+        const iframeSrc = isLocalUrl
+          ? `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`
+          : pdfUrl;
 
         return (
           <div className={isPdfFullScreen ? "fixed inset-0 z-50 bg-white dark:bg-darkbg-200 flex flex-col justify-between animate-scale-in" : "fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-2 sm:p-4 animate-scale-in"}>

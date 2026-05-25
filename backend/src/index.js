@@ -95,7 +95,12 @@ if (!fs.existsSync(uploadsPath)) {
 }
 
 // Static directories serving local uploads fallback
-app.use('/uploads', express.static(uploadsPath));
+// Set cross-origin headers so PDFs/files can be loaded in iframes from different origins (dev mode)
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+}, express.static(uploadsPath));
 
 // API Routes
 app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
