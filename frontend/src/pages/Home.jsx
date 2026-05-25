@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Sparkles, Video, FileDown, ArrowRight, Languages, Percent, FlaskConical, Binary, Atom, Brain, GraduationCap, Lightbulb, Calculator, Globe, FolderOpen, Phone, Mail, Heart, Share2 } from 'lucide-react';
+import { BookOpen, Sparkles, Video, FileDown, ArrowRight, Languages, Percent, FlaskConical, Binary, Atom, Brain, GraduationCap, Lightbulb, Calculator, Globe, FolderOpen, Phone, Mail, Heart, Share2, Award } from 'lucide-react';
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
@@ -19,19 +19,22 @@ export default function Home() {
     { name: 'Reasoning', icon: Lightbulb, color: 'from-amber-500 to-orange-600', desc: 'કોડિંગ, દિશા-અંતર અને તાર્કિક કોયડા' },
     { name: 'Maths', icon: Calculator, color: 'from-teal-500 to-emerald-600', desc: 'સ્પર્ધાત્મક અંકગણિત શોર્ટકટ ટ્રીક્સ' },
     { name: 'GK', icon: Globe, color: 'from-sky-500 to-blue-600', desc: 'ગુજરાત સામાન્ય જ્ઞાન અને વર્તમાન પ્રવાહો' },
+    { name: 'TAT', icon: Sparkles, color: 'from-fuchsia-500 to-indigo-650', desc: 'TAT પરીક્ષાનું સંપૂર્ણ સાહિત્ય અને પેપર્સ' },
+    { name: 'TET', icon: Award, color: 'from-rose-500 to-pink-600', desc: 'TET ૧ અને ૨ માટે ઉપયોગી મટીરીયલ્સ' },
+    { name: 'Std 6 to 8', icon: GraduationCap, color: 'from-emerald-500 to-sky-650', desc: 'ધોરણ ૬ થી ૮ અભ્યાસક્રમ અને પુસ્તકો' },
     { name: 'Others', icon: FolderOpen, color: 'from-slate-500 to-slate-600', desc: 'અન્ય ઉપયોગી ફાઈલો અને મોક પેપર્સ' },
   ];
 
   const handleShareApp = async () => {
     try {
       await navigator.share({
-        title: 'SS STUDY - Premium Study Material App',
-        text: 'SS STUDY એપ ડાઉનલોડ કરો! ધોરણ 9-10 અને સ્પર્ધાત્મક પરીક્ષાની શ્રેષ્ઠ તૈયારી. PDFs, Videos, Quizzes - બધું એક જ જગ્યાએ.',
+        title: 'EDUCATION07_ - Premium Study Material App',
+        text: 'EDUCATION07_ એપ ડાઉનલોડ કરો! ધોરણ 6 થી 10 અને સરકારી પરીક્ષાઓની શ્રેષ્ઠ તૈયારી. PDFs, Videos, Quizzes - બધું એક જ જગ્યાએ.',
         url: window.location.origin,
       });
     } catch (err) {
       // Fallback: WhatsApp share
-      const msg = encodeURIComponent(`SS STUDY - Premium Study Material App 📚\n\nધોરણ 9-10 અને સ્પર્ધાત્મક પરીક્ષાની શ્રેષ્ઠ તૈયારી.\nPDFs, Videos, Daily Quizzes - બધું Free!\n\n👉 ${window.location.origin}`);
+      const msg = encodeURIComponent(`EDUCATION07_ - Premium Study Material App 📚\n\nધોરણ 6 થી 10 અને સરકારી પરીક્ષાઓની શ્રેષ્ઠ તૈયારી.\nPDFs, Videos, Daily Quizzes - બધું Free!\n\n👉 ${window.location.origin}`);
       window.open(`https://wa.me/?text=${msg}`, '_blank');
     }
   };
@@ -45,7 +48,7 @@ export default function Home() {
         <div className="relative max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-premium-500/10 px-4 py-1.5 text-xs font-bold text-premium-600 dark:text-premium-300">
             <Sparkles className="h-4 w-4 text-premium-500 fill-premium-500" />
-            SS STUDY — તમારી તૈયારીનો વિશ્વાસુ સાથી
+            EDUCATION07_ — તમારી તૈયારીનો વિશ્વાસુ સાથી
           </div>
  
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-800 dark:text-white font-sans">
@@ -56,7 +59,7 @@ export default function Home() {
           </h1>
 
           <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-500 dark:text-slate-400">
-            ધોરણ 9-10 અને સ્પર્ધાત્મક પરીક્ષા માટે organized PDFs, video tutorials, mock tests, અને ZIP files. Gujarati Grammer, English, Maths, Science, Manovigyan, Pedagogy, Reasoning, અને GK.
+            ધોરણ 6 થી 10, Std 6 to 8 અને સરકારી પરીક્ષાઓ (TET, TAT, વગેરે) માટે organized PDFs, video tutorials, mock tests, અને ZIP files. Gujarati Grammer, English, Maths, Science, Manovigyan, Pedagogy, Reasoning, અને GK.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -193,12 +196,12 @@ export default function Home() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-premium-500 to-indigo-600 text-white font-extrabold text-xs shadow-md">
-                  SS
+                  ED
                 </div>
-                <span className="font-bold text-lg">SS STUDY</span>
+                <span className="font-bold text-lg">EDUCATION07_</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                ધોરણ 9-10 અને સરકારી સ્પર્ધાત્મક પરીક્ષાઓ માટેનું ગુજરાતનું શ્રેષ્ઠ ડિજિટલ અભ્યાસ પ્લેટફોર્મ.
+                ધોરણ 6 થી 10 અને સરકારી સ્પર્ધાત્મક પરીક્ષાઓ (TET, TAT) માટેનું ગુજરાતનું શ્રેષ્ઠ ડિજિટલ અભ્યાસ પ્લેટફોર્મ.
               </p>
             </div>
 
@@ -231,7 +234,7 @@ export default function Home() {
 
           {/* Bottom bar */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] text-slate-500">
-            <p>© 2026 SS STUDY. All rights reserved.</p>
+            <p>© 2026 EDUCATION07_. All rights reserved.</p>
             <p className="flex items-center gap-1">
               Made with <Heart className="h-3 w-3 text-rose-500 fill-rose-500" /> by Meet Berani
             </p>

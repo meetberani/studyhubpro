@@ -64,10 +64,10 @@ export default function Navbar({ onToggleSidebar }) {
           
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-premium-500 to-indigo-600 shadow-md text-white font-extrabold text-xs hidden sm:flex">
-              SS
+              ED
             </div>
             <span className="font-sans font-bold text-base sm:text-lg bg-gradient-to-r from-premium-600 to-indigo-600 dark:from-premium-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              SS STUDY
+              EDUCATION07_
             </span>
           </Link>
         </div>
@@ -270,7 +270,7 @@ export default function Navbar({ onToggleSidebar }) {
                   }}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-250 bg-rose-50/50 py-3 text-center text-xs font-extrabold text-rose-600 dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-400 hover:bg-rose-105 dark:hover:bg-rose-950/30 transition-all"
                 >
-                  <LogOut className="h-4 w-4" /> Sign Out from SS STUDY
+                  <LogOut className="h-4 w-4" /> Sign Out from EDUCATION07_
                 </button>
               </div>
             </div>

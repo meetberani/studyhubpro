@@ -229,7 +229,67 @@ const mockMaterials = [
     accessType: 'premium',
   },
 
-  // 12. Others
+  // 12. TAT
+  {
+    title: 'TAT Secondary Teacher Syllabus & Blueprint PDF',
+    description: 'TAT માધ્યમિક પરીક્ષા પદ્ધતિ, ગુણભાર અને વિગતવાર અભ્યાસક્રમ માર્ગદર્શિકા PDF.',
+    category: 'TAT',
+    type: 'pdf',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=600&auto=format&fit=crop',
+    accessType: 'free',
+  },
+  {
+    title: 'TAT Higher Secondary Content Master Lecture Video',
+    description: 'ઉચ્ચતર માધ્યમિક શિક્ષક પરીક્ષા માટે મુખ્ય વિષય પદ્ધતિ અને વર્ગવ્યવહાર લેક્ચર.',
+    category: 'TAT',
+    type: 'video',
+    fileUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
+    accessType: 'premium',
+  },
+
+  // 13. TET
+  {
+    title: 'TET 1 & 2 Pedagogy & Child Dev Imp Notes',
+    description: 'બાળ વિકાસ, સિદ્ધાંતો અને શિક્ષણશાસ્ત્રના વારંવાર પૂછાતા અતિ ઉપયોગી પ્રશ્નો.',
+    category: 'TET',
+    type: 'pdf',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?q=80&w=600&auto=format&fit=crop',
+    accessType: 'free',
+  },
+  {
+    title: 'TET 2 Science & Maths Previous Solved Papers ZIP',
+    description: 'છેલ્લા ૫ વર્ષના સોલ્વ કરેલા ગણિત-વિજ્ઞાન વિભાગના પ્રશ્નપત્રોની ફાઇલ સંગ્રહ.',
+    category: 'TET',
+    type: 'zip',
+    fileUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-zip-file.zip',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=600&auto=format&fit=crop',
+    accessType: 'premium',
+  },
+
+  // 14. Std 6 to 8
+  {
+    title: 'Std 6-8 Social Science NCERT Book Summary',
+    description: 'ધોરણ ૬ થી ૮ સામાજિક વિજ્ઞાન વિષયનું અતિ મહત્વનું એકમ-વાર વિશ્લેષણ PDF.',
+    category: 'Std 6 to 8',
+    type: 'pdf',
+    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=600&auto=format&fit=crop',
+    accessType: 'free',
+  },
+  {
+    title: 'Std 6-8 Science & Maths Chapter-wise Videos',
+    description: 'ધોરણ ૬, ૭ અને ૮ ગણિત-વિજ્ઞાનના અઘરા પ્રકરણોની એનિમેટેડ સમજૂતી વિડીયો.',
+    category: 'Std 6 to 8',
+    type: 'video',
+    fileUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop',
+    accessType: 'premium',
+  },
+
+  // 15. Others
   {
     title: 'સ્પર્ધાત્મક પરીક્ષા ટાઇમ મેનેજમેન્ટ અને સિલેબસ વિગત',
     description: 'પરીક્ષાઓ ક્રેક કરવા માટે શ્રેષ્ઠ ટાઈમ ટેબલ બનાવવાની અને વાંચન કઈ રીતે કરવું તેની માર્ગદર્શિકા.',

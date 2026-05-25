@@ -340,7 +340,7 @@ export default function UserDashboard() {
             <div className="md:col-span-3 space-y-3.5 text-center md:text-left">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1 text-[10px] font-black text-slate-900 shadow-md premium-glow animate-pulse">
                 <Sparkles className="h-3.5 w-3.5 fill-slate-900" />
-                SS STUDY - PREMIUM USER
+                EDUCATION07_ - PREMIUM USER
               </div>
               <h2 className="text-2xl sm:text-3xl font-black font-sans tracking-tight leading-tight">
                 અભ્યાસ મટીરીયલ અને વિડીયો લેક્ચર્સ
@@ -443,7 +443,7 @@ export default function UserDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-6 p-6 sm:p-8 relative z-10">
           <div className="md:col-span-3 space-y-3.5 text-center md:text-left">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/50 border border-indigo-400/40 px-3 py-1 text-[10px] font-black text-white">
-              SS STUDY - PREMIUM LEARNING
+              EDUCATION07_ - PREMIUM LEARNING
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
               ધોરણ 9-10 અને સરકારી પરીક્ષાની શ્રેષ્ઠ તૈયારી
@@ -915,7 +915,7 @@ export default function UserDashboard() {
                 <p className="italic text-slate-650 dark:text-slate-350 leading-relaxed">
                   "ધ્યેય પ્રાપ્ત કરવા માટે સતત મહેનત અને ધીરજ એ જ સાચી ચાવી છે. આજનો દિવસ તમારી તૈયારીને વધુ મજબૂત બનાવવાનો છે!"
                 </p>
-                <p className="text-[10px] text-premium-500 font-bold mt-2 text-right">— SS Study Guide</p>
+                <p className="text-[10px] text-premium-500 font-bold mt-2 text-right">— EDUCATION07_ Guide</p>
               </div>
 
               <div className="space-y-2">
@@ -1476,7 +1476,7 @@ export default function UserDashboard() {
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-black text-lg text-slate-800 dark:text-white">અભિનંદન! ટેસ્ટ પૂર્ણ થઈ ગઈ છે.</h4>
-                    <p className="text-xs text-slate-400">SS STUDY Daily MCQ Practice Result</p>
+                    <p className="text-xs text-slate-400">EDUCATION07_ Daily MCQ Practice Result</p>
                   </div>
 
                   {/* Score breakdown metrics card */}

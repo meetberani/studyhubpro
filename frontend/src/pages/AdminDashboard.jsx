@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState('');
   
   // Forms states
-  const [materialForm, setMaterialForm] = useState({ title: '', description: '', category: 'SSC', type: 'pdf', accessType: 'free' });
+  const [materialForm, setMaterialForm] = useState({ title: '', description: '', category: 'Gujarati Grammer', type: 'pdf', accessType: 'free' });
   const [materialFile, setMaterialFile] = useState(null);
   const [materialThumb, setMaterialThumb] = useState(null);
   
@@ -58,6 +58,9 @@ export default function AdminDashboard() {
     'Reasoning',
     'Maths',
     'GK',
+    'TAT',
+    'TET',
+    'Std 6 to 8',
     'Others',
   ];
 
@@ -73,7 +76,10 @@ export default function AdminDashboard() {
     { label: 'Reason', pct: '22%', height: 80, fill: 'url(#pinkBar)' },
     { label: 'Maths', pct: '25%', height: 90, fill: 'url(#amberBar)' },
     { label: 'GK', pct: '30%', height: 105, fill: 'url(#emeraldBar)' },
-    { label: 'Others', pct: '8%', height: 35, fill: 'url(#cyanBar)' },
+    { label: 'TAT', pct: '14%', height: 58, fill: 'url(#purpleBar)' },
+    { label: 'TET', pct: '16%', height: 64, fill: 'url(#indigoBar)' },
+    { label: 'Std 6-8', pct: '10%', height: 42, fill: 'url(#cyanBar)' },
+    { label: 'Others', pct: '8%', height: 35, fill: 'url(#pinkBar)' },
   ];
 
   // Clear notifications
@@ -242,7 +248,7 @@ export default function AdminDashboard() {
 
       if (res.data && res.data.success) {
         setSuccessMsg('Study resource uploaded successfully!');
-        setMaterialForm({ title: '', description: '', category: 'SSC', type: 'pdf', accessType: 'free' });
+        setMaterialForm({ title: '', description: '', category: 'Gujarati Grammer', type: 'pdf', accessType: 'free' });
         setMaterialFile(null);
         setMaterialThumb(null);
         // Reset file inputs visually
@@ -540,9 +546,9 @@ export default function AdminDashboard() {
                   <line x1="20" y1="150" x2="480" y2="150" stroke="#e2e8f0" className="dark:stroke-slate-800/60" />
                   
                   {chartData.map((item, index) => {
-                    const barWidth = 18;
-                    const barGap = 37;
-                    const startX = 30;
+                    const barWidth = 12;
+                    const barGap = 30;
+                    const startX = 20;
                     const x = startX + index * barGap;
                     const height = item.height;
                     const y = 150 - height;

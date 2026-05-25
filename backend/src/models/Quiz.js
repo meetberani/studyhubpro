@@ -47,6 +47,9 @@ const quizSchema = new mongoose.Schema({
       'Reasoning',
       'Maths',
       'GK',
+      'TAT',
+      'TET',
+      'Std 6 to 8',
       'Others'
     ],
   },

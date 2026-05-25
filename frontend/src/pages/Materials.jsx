@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth, API_URL, SERVER_URL } from '../context/AuthContext';
 import AdBanner from '../components/AdBanner';
 import { CardSkeleton } from '../components/SkeletonLoader';
-import { Search, Filter, Play, Download, Lock, FileText, FolderArchive, Film, ExternalLink, Sparkles, X, Star, Eye, BookOpen, Languages, Percent, FlaskConical, Binary, Atom, Brain, GraduationCap, Lightbulb, Calculator, Globe, FolderOpen, Share2 } from 'lucide-react';
+import { Search, Filter, Play, Download, Lock, FileText, FolderArchive, Film, ExternalLink, Sparkles, X, Star, Eye, BookOpen, Languages, Percent, FlaskConical, Binary, Atom, Brain, GraduationCap, Lightbulb, Calculator, Globe, FolderOpen, Share2, Award } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function Materials() {
@@ -32,6 +32,9 @@ export default function Materials() {
     'Reasoning': { icon: Lightbulb, color: 'from-amber-500 to-orange-600' },
     'Maths': { icon: Calculator, color: 'from-teal-500 to-emerald-600' },
     'GK': { icon: Globe, color: 'from-sky-500 to-blue-600' },
+    'TAT': { icon: Sparkles, color: 'from-fuchsia-500 to-indigo-650' },
+    'TET': { icon: Award, color: 'from-rose-500 to-pink-600' },
+    'Std 6 to 8': { icon: GraduationCap, color: 'from-emerald-500 to-sky-650' },
     'Others': { icon: FolderOpen, color: 'from-slate-500 to-slate-600' }
   };
   const navigate = useNavigate();
@@ -68,6 +71,9 @@ export default function Materials() {
     'Reasoning',
     'Maths',
     'GK',
+    'TAT',
+    'TET',
+    'Std 6 to 8',
     'Others',
   ];
 
@@ -384,9 +390,9 @@ export default function Materials() {
                         <button
                           onClick={async () => {
                             try {
-                              await navigator.share({ title: item.title, text: `SS STUDY: ${item.title} - ${item.category}`, url: window.location.origin });
+                              await navigator.share({ title: item.title, text: `EDUCATION07_: ${item.title} - ${item.category}`, url: window.location.origin });
                             } catch (e) {
-                              const msg = encodeURIComponent(`📚 SS STUDY: ${item.title}\n${item.category}\n\n👉 ${window.location.origin}`);
+                              const msg = encodeURIComponent(`📚 EDUCATION07_: ${item.title}\n${item.category}\n\n👉 ${window.location.origin}`);
                               window.open(`https://wa.me/?text=${msg}`, '_blank');
                             }
                           }}
