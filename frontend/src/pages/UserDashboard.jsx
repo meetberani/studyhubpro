@@ -1289,11 +1289,12 @@ export default function UserDashboard() {
         // Determine if the PDF is hosted locally (dev uploads) or on a public CDN (Cloudinary etc.)
         const isLocalUrl = pdfUrl.includes('localhost') || pdfUrl.startsWith('/uploads');
 
-        // Use direct URL for public/Cloudinary PDFs; use Google Docs Viewer only for local dev uploads
-        // Google gview requires a publicly accessible URL — fails for localhost and private servers
+        // Always use Google Docs Viewer for all public URLs — Cloudinary raw PDFs serve with
+        // Content-Disposition:attachment which blocks direct iframe embedding.
+        // For localhost dev, gview can't reach it, so we use direct URL as best-effort.
         const iframeSrc = isLocalUrl
-          ? `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`
-          : pdfUrl;
+          ? pdfUrl
+          : `https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
 
         return (
           <div className={isPdfFullScreen ? "fixed inset-0 z-50 bg-white dark:bg-darkbg-200 flex flex-col justify-between animate-scale-in" : "fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-2 sm:p-4 animate-scale-in"}>
@@ -1365,13 +1366,27 @@ export default function UserDashboard() {
                 </div>
               </div>
 
-              {/* Embedded PDF Viewer using local direct loading or Gview fallback */}
+              {/* Embedded PDF Viewer — Google Docs Viewer for public URLs, direct for local */}
               <div className="flex-1 bg-slate-100 dark:bg-darkbg-100 p-2 select-none relative" onContextMenu={(e) => e.preventDefault()}>
                 <iframe
+                  key={activePdf._id + '_' + Date.now()}
                   src={iframeSrc}
                   className="w-full h-full border-none rounded-2xl shadow-inner bg-slate-50 dark:bg-slate-900"
                   title={activePdf.title}
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  allow="autoplay"
                 />
+                {/* Fallback message overlay — shown beneath the iframe, visible if iframe content is empty/blocked */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <div className="pointer-events-auto bg-white/90 dark:bg-darkbg-200/90 backdrop-blur-sm rounded-2xl p-6 text-center shadow-lg border border-slate-200/50 dark:border-slate-700/50 max-w-sm hidden" id="pdf-fallback-msg-ud">
+                    <FileText className="h-10 w-10 text-slate-400 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">PDF લોડ થઈ રહ્યું છે...</p>
+                    <p className="text-xs text-slate-400 mb-3">If the document doesn't load, use the "Open PDF" button above.</p>
+                    <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold">
+                      <ExternalLink className="h-3 w-3" /> Open in Browser
+                    </a>
+                  </div>
+                </div>
               </div>
 
               {/* Modal Footer Description */}
