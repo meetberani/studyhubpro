@@ -124,6 +124,8 @@ app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
+}, express.static(uploadsPath));
+
 // Serve ads.txt directly at root for digital ad inventory seller authorization
 app.get('/ads.txt', (req, res) => {
   const adsPath = path.resolve(__dirname, '../../frontend/public/ads.txt');
