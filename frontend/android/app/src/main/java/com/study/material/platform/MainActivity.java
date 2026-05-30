@@ -14,5 +14,8 @@ public class MainActivity extends BridgeActivity {
         StartAppSDK.initParams(this, "204789628")
             .setReturnAdsEnabled(false)
             .init();
+            
+        // Enable Test Ads for immediate visual validation during development/testing
+        StartAppSDK.setTestAdsEnabled(true);
     }
 }
