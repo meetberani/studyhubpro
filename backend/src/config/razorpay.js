@@ -55,21 +55,38 @@ const createRazorpayOrder = async (amount, receiptId) => {
   }
 };
 
-/**
- * Verify Razorpay payment signature
- */
 const verifyRazorpaySignature = (orderId, paymentId, signature) => {
   if (!isRazorpayConfigured) {
     console.log('[Mock Razorpay] Verifying signature in sandbox mode.');
     return true; // Simulate pass
   }
 
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    console.error('[Razorpay Security Error] RAZORPAY_KEY_SECRET is undefined in your environment variables!');
+    return false;
+  }
+
   const crypto = require('crypto');
-  const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+  const hmac = crypto.createHmac('sha256', secret);
   hmac.update(orderId + "|" + paymentId);
   const generatedSignature = hmac.digest('hex');
 
-  return generatedSignature === signature;
+  const isMatched = generatedSignature === signature;
+  
+  if (!isMatched) {
+    console.error('================================================================');
+    console.error('[Razorpay Verification Failure] Payment Signature Mismatch!');
+    console.error(`OrderId: ${orderId} | PaymentId: ${paymentId}`);
+    console.error(`Secret Key Length: ${secret.length} chars (Check for extra spaces!)`);
+    console.error(`Received Signature:  ${signature}`);
+    console.error(`Generated Signature: ${generatedSignature}`);
+    console.error('================================================================');
+  } else {
+    console.log(`[Razorpay Success] Signature verified successfully for payment ${paymentId}`);
+  }
+
+  return isMatched;
 };
 
 module.exports = {
