@@ -21,7 +21,7 @@ exports.getUPIDetails = async (req, res) => {
   try {
     const upiId = process.env.UPI_ID || 'studyplatform@upi';
     const merchantName = process.env.UPI_MERCHANT_NAME || 'Premium Study Platform';
-    const amount = process.env.UPI_AMOUNT || '50';
+    const amount = process.env.UPI_AMOUNT || '99';
 
     // Encode parameters for standard UPI deep link protocol
     // Format: upi://pay?pa=address&pn=name&am=amount&cu=INR
@@ -82,7 +82,7 @@ exports.requestPremium = async (req, res) => {
     // Create payment entry
     const payment = await Payment.create({
       userId,
-      amount: Number(process.env.UPI_AMOUNT || 50),
+      amount: Number(process.env.UPI_AMOUNT || 99),
       transactionId: transactionId || `TXN-${Date.now()}`,
       screenshotUrl: uploadResult.secure_url,
       screenshotPublicId: uploadResult.public_id,
@@ -186,7 +186,7 @@ const { createRazorpayOrder, verifyRazorpaySignature } = require('../config/razo
 // @access  Private
 exports.createOrder = async (req, res) => {
   try {
-    const amount = Number(process.env.UPI_AMOUNT || 50);
+    const amount = Number(process.env.UPI_AMOUNT || 99);
     const receiptId = `receipt_order_${Date.now()}`;
     
     console.log(`Generating Razorpay Order for ₹${amount}`);
@@ -239,7 +239,7 @@ exports.verifySignature = async (req, res) => {
     // Log verified payment in DB
     await Payment.create({
       userId: req.user._id,
-      amount: Number(process.env.UPI_AMOUNT || 50),
+      amount: Number(process.env.UPI_AMOUNT || 99),
       transactionId: razorpay_payment_id,
       screenshotUrl: 'https://cdn.razorpay.com/static/assets/logo.svg', // Flagged as gateway transaction
       screenshotPublicId: `gateway_${razorpay_payment_id}`,
