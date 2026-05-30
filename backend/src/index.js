@@ -129,7 +129,7 @@ app.use('/uploads', (req, res, next) => {
 // API Routes
 app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
 app.use('/api/materials', require('./routes/materialRoutes'));
-app.use('/api/payments', uploadLimiter, require('./routes/paymentRoutes'));
+app.use('/api/payments', require('./routes/paymentRoutes'));
 app.use('/api/notices', require('./routes/noticeRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/quizzes', require('./routes/quizRoutes'));
