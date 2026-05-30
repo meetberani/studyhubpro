@@ -124,7 +124,16 @@ app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
-}, express.static(uploadsPath));
+// Serve ads.txt directly at root for digital ad inventory seller authorization
+app.get('/ads.txt', (req, res) => {
+  const adsPath = path.resolve(__dirname, '../../frontend/public/ads.txt');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  if (fs.existsSync(adsPath)) {
+    return res.sendFile(adsPath);
+  }
+  // Inline fallback to prevent any filesystem drift issues
+  res.send(`start.io, 175055845, DIRECT\npubnative.net, 1007349, RESELLER, d641df8625486a7b\npubnative.net, 1008289, RESELLER, d641df8625486a7b`);
+});
 
 // API Routes
 app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
