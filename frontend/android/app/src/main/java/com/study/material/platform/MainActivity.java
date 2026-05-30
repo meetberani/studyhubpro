@@ -8,12 +8,17 @@ import android.widget.LinearLayout;
 
 import com.getcapacitor.BridgeActivity;
 import com.startapp.sdk.adsbase.StartAppSDK;
+import com.startapp.sdk.adsbase.StartAppAd;
+import com.startapp.sdk.adsbase.Ad;
+import com.startapp.sdk.adsbase.AdEventListener;
+import com.startapp.sdk.adsbase.adlisteners.VideoListener;
+import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener;
 import com.startapp.sdk.ads.banner.Banner;
 import com.startapp.sdk.ads.banner.BannerListener;
 
 public class MainActivity extends BridgeActivity {
 
-    private Banner  startAppBanner;
+    private Banner startAppBanner;
     private LinearLayout adContainer;
     private boolean adVisible = false;
 
@@ -102,6 +107,94 @@ public class MainActivity extends BridgeActivity {
         if (adContainer != null) {
             adContainer.setVisibility(View.GONE);
         }
+    }
+
+    /** Shows full-screen Interstitial Ad (Earning Ad) programmatically */
+    public void showInterstitial(final AdControlPlugin.AdCallback callback) {
+        runOnUiThread(() -> {
+            try {
+                final StartAppAd startAppAd = new StartAppAd(MainActivity.this);
+                startAppAd.loadAd(new AdEventListener() {
+                    @Override
+                    public void onReceiveAd(Ad ad) {
+                        startAppAd.showAd(new AdDisplayListener() {
+                            @Override
+                            public void adDisplayed(Ad ad) {
+                                if (callback != null) callback.onSuccess();
+                            }
+
+                            @Override
+                            public void adNotDisplayed(Ad ad) {
+                                if (callback != null) callback.onFailure("Ad not displayed: " + ad.getErrorMessage());
+                            }
+
+                            @Override
+                            public void adClicked(Ad ad) {}
+
+                            @Override
+                            public void adHidden(Ad ad) {
+                                if (callback != null) callback.onAdClosed();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailedToReceiveAd(Ad ad) {
+                        if (callback != null) callback.onFailure("Failed to receive interstitial: " + ad.getErrorMessage());
+                    }
+                });
+            } catch (Exception e) {
+                if (callback != null) callback.onFailure("Exception showing interstitial: " + e.getMessage());
+            }
+        });
+    }
+
+    /** Shows full-screen Rewarded Video Ad (High Earning Ad) programmatically */
+    public void showRewarded(final AdControlPlugin.AdCallback callback) {
+        runOnUiThread(() -> {
+            try {
+                final StartAppAd rewardedAd = new StartAppAd(MainActivity.this);
+                
+                rewardedAd.setVideoListener(new VideoListener() {
+                    @Override
+                    public void onVideoCompleted() {
+                        if (callback != null) callback.onRewardEarned();
+                    }
+                });
+
+                rewardedAd.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, new AdEventListener() {
+                    @Override
+                    public void onReceiveAd(Ad ad) {
+                        rewardedAd.showAd(new AdDisplayListener() {
+                            @Override
+                            public void adDisplayed(Ad ad) {
+                                if (callback != null) callback.onSuccess();
+                            }
+
+                            @Override
+                            public void adNotDisplayed(Ad ad) {
+                                if (callback != null) callback.onFailure("Ad not displayed: " + ad.getErrorMessage());
+                            }
+
+                            @Override
+                            public void adClicked(Ad ad) {}
+
+                            @Override
+                            public void adHidden(Ad ad) {
+                                if (callback != null) callback.onAdClosed();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailedToReceiveAd(Ad ad) {
+                        if (callback != null) callback.onFailure("Failed to receive rewarded video: " + ad.getErrorMessage());
+                    }
+                });
+            } catch (Exception e) {
+                if (callback != null) callback.onFailure("Exception showing rewarded video: " + e.getMessage());
+            }
+        });
     }
 
     @Override

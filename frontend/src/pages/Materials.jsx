@@ -8,7 +8,7 @@ import { Search, Filter, Play, Download, Lock, FileText, FolderArchive, Film, Ex
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function Materials() {
-  const { isPremium, isAdmin } = useAuth();
+  const { isPremium, isAdmin, triggerInterstitialAd, triggerRewardedAd } = useAuth();
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -51,12 +51,13 @@ export default function Materials() {
     localStorage.setItem('bookmarks', JSON.stringify(updated));
   };
 
-  const handleReadPdf = (item) => {
+  const handleReadPdf = async (item) => {
     const isLocked = item.accessType === 'premium' && !isPremium && !isAdmin;
     if (isLocked) {
       navigate('/payment');
       return;
     }
+    await triggerInterstitialAd();
     setActivePdf(item);
   };
 
@@ -109,6 +110,18 @@ export default function Materials() {
       return;
     }
 
+    // Trigger rewarded video ad for free users on Android native
+    if (window.Capacitor && window.Capacitor.isNativePlatform() && !isPremium && !isAdmin) {
+      const confirmed = window.confirm("તમારું મટીરીયલ ડાઉનલોડ કરવા માટે એક ટૂંકી એડ જુઓ");
+      if (!confirmed) return;
+      
+      const success = await triggerRewardedAd();
+      if (!success) {
+        alert("ડાઉનલોડ કરવા માટે આખી વિડીયો એડ જોવી જરૂરી છે.");
+        return;
+      }
+    }
+
     try {
       // Increment download counter
       await axios.post(`${API_URL}/materials/${item._id}/download`);
@@ -131,12 +144,13 @@ export default function Materials() {
     }
   };
 
-  const handleWatchVideo = (item) => {
+  const handleWatchVideo = async (item) => {
     const isLocked = item.accessType === 'premium' && !isPremium && !isAdmin;
     if (isLocked) {
       navigate('/payment');
       return;
     }
+    await triggerInterstitialAd();
     setActiveVideo(item);
   };
 

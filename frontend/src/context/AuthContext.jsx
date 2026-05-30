@@ -153,6 +153,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const triggerInterstitialAd = async () => {
+    const isUserPremium = user?.premium === true || user?.role === 'admin';
+    if (isUserPremium) return true;
+
+    try {
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { Plugins } = window.Capacitor;
+        if (Plugins && Plugins.AdControl) {
+          await Plugins.AdControl.showInterstitial();
+        }
+      }
+    } catch (e) {
+      console.warn('Native interstitial ad failed to display:', e);
+    }
+    return true; // Return true so user action is never blocked if ad fails or finishes
+  };
+
+  const triggerRewardedAd = async () => {
+    const isUserPremium = user?.premium === true || user?.role === 'admin';
+    if (isUserPremium) return true;
+
+    try {
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { Plugins } = window.Capacitor;
+        if (Plugins && Plugins.AdControl) {
+          const res = await Plugins.AdControl.showRewarded();
+          return res && res.rewarded === true;
+        }
+      }
+    } catch (e) {
+      console.warn('Native rewarded ad failed to display:', e);
+    }
+    return false; // Return false if they skipped or ad failed
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -163,6 +198,8 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         refreshUser,
+        triggerInterstitialAd,
+        triggerRewardedAd,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'admin',
         isPremium: user?.premium === true,
