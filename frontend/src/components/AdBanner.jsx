@@ -83,8 +83,8 @@ export default function AdBanner({ position = 'top' }) {
         position === 'sidebar' ? 'my-4' : 'my-6'
       }`}
     >
-      {/* Start.io container hooks for programmatic injection */}
-      <div id={`startio-ad-${position}`} className="hidden" data-app-id="204789628"></div>
+      {/* Start.io SDK native ad injection target — must NOT be hidden */}
+      <div id={`startio-ad-${position}`} data-app-id="204789628" style={{ display: 'none', width: '100%', minHeight: '50px' }}></div>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Ad Left Section: Content */}
