@@ -46,12 +46,17 @@ const NATIVE_SPONSORS = [
 export default function AdBanner({ position = 'top' }) {
   const { isPremium, isAdmin } = useAuth();
   const [dismissed, setDismissed] = useState(false);
-  const [activeSponsor, setActiveSponsor] = useState(null);
-
-  // Pick a random sponsor advertisement on load
-  useEffect(() => {
+  const [activeSponsor, setActiveSponsor] = useState(() => {
     const randomIndex = Math.floor(Math.random() * NATIVE_SPONSORS.length);
-    setActiveSponsor(NATIVE_SPONSORS[randomIndex]);
+    return NATIVE_SPONSORS[randomIndex];
+  });
+
+  // Pick a random sponsor advertisement on load (resilient fallback)
+  useEffect(() => {
+    if (!activeSponsor) {
+      const randomIndex = Math.floor(Math.random() * NATIVE_SPONSORS.length);
+      setActiveSponsor(NATIVE_SPONSORS[randomIndex]);
+    }
 
     // Optional: Start.io Dynamic Tag binding hook
     // When deploying on native Android wrapper, if Start.io JS SDK is integrated:
