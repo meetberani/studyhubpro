@@ -372,7 +372,7 @@ export default function Materials() {
                         className="flex items-center gap-1 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-bold text-slate-900 hover:bg-amber-500 transition-all shadow-md shadow-amber-400/20"
                       >
                         <Lock className="h-3.5 w-3.5" />
-                        Unlock ₹50
+                        Unlock ₹99
                       </Link>
                     ) : (
                       <div className="flex gap-2 flex-wrap">
