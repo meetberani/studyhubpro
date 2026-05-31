@@ -1,19 +1,21 @@
 const Razorpay = require('razorpay');
 
-// Dual-mode Razorpay client
-// If keys are provided in .env, it initializes active integration; otherwise, it falls back to a sandbox simulator mode
+// Fallback to live keys directly if environment variables are not set on hosting (e.g. Render Dashboard)
+const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_live_SvY4hhvhYRET9j';
+const keySecret = process.env.RAZORPAY_KEY_SECRET || 'OZvJI4FwdFhSB06QNsF8mgHs';
+
 const isRazorpayConfigured = !!(
-  process.env.RAZORPAY_KEY_ID && 
-  process.env.RAZORPAY_KEY_SECRET &&
-  process.env.RAZORPAY_KEY_ID !== 'your_razorpay_key_id'
+  keyId && 
+  keySecret &&
+  keyId !== 'your_razorpay_key_id'
 );
 
 let razorpay = null;
 
 if (isRazorpayConfigured) {
   razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+    key_id: keyId,
+    key_secret: keySecret,
   });
   console.log('Razorpay SDK payment engine loaded successfully in production mode.');
 } else {
@@ -61,9 +63,9 @@ const verifyRazorpaySignature = (orderId, paymentId, signature) => {
     return true; // Simulate pass
   }
 
-  const secret = process.env.RAZORPAY_KEY_SECRET;
+  const secret = keySecret;
   if (!secret) {
-    console.error('[Razorpay Security Error] RAZORPAY_KEY_SECRET is undefined in your environment variables!');
+    console.error('[Razorpay Security Error] secret key is undefined!');
     return false;
   }
 
@@ -94,4 +96,6 @@ module.exports = {
   createRazorpayOrder,
   verifyRazorpaySignature,
   isRazorpayConfigured,
+  keyId,
+  keySecret
 };

@@ -178,7 +178,7 @@ exports.adminVerifyPayment = async (req, res) => {
 // ==========================================
 // Razorpay Webhook & Order SDK Methods
 // ==========================================
-const { createRazorpayOrder, verifyRazorpaySignature } = require('../config/razorpay');
+const { createRazorpayOrder, verifyRazorpaySignature, keyId } = require('../config/razorpay');
 
 // @desc    Generate Razorpay Order
 // @route   POST /api/payments/razorpay/order
@@ -198,7 +198,7 @@ exports.createOrder = async (req, res) => {
         amount: order.amount,
         currency: order.currency,
         receipt: order.receipt,
-        keyId: process.env.RAZORPAY_KEY_ID || 'sandbox_key',
+        keyId: keyId || 'sandbox_key',
         mock: !!order.mock,
       }
     });
