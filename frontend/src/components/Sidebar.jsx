@@ -1,10 +1,28 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, BookOpen, CreditCard, ShieldAlert, Sparkles, Shield, LogOut, Smartphone } from 'lucide-react';
+import { LayoutDashboard, BookOpen, CreditCard, ShieldAlert, Sparkles, Shield, LogOut, Smartphone, Share2 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout, isPremium, isAdmin } = useAuth();
+
+  const handleShareApp = async () => {
+    const downloadLink = 'https://apkbuild.netlify.app/';
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'EDUCATION07_ - Premium Study Material App',
+          text: 'EDUCATION07_ એપ ડાઉનલોડ કરો! ધોરણ 6 થી 10 અને સરકારી પરીક્ષાઓની શ્રેષ્ઠ તૈયારી. PDFs, Videos, Quizzes - બધું એક જ જગ્યાએ.',
+          url: downloadLink,
+        });
+      } else {
+        throw new Error('Web share not supported');
+      }
+    } catch (err) {
+      const msg = encodeURIComponent(`EDUCATION07_ - Premium Study Material App 📚\n\nધોરણ 6 થી 10 અને સરકારી પરીક્ષાઓની શ્રેષ્ઠ તૈયારી.\nPDFs, Videos, Daily Quizzes - બધું Free!\n\nડાઉનલોડ લિંક 👉 ${downloadLink}`);
+      window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+  };
 
   const menuItems = [
     {
@@ -116,11 +134,19 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* Sidebar Footer: Logout Button */}
-          <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
+          {/* Sidebar Footer: Share & Logout Button */}
+          <div className="border-t border-slate-100 pt-4 dark:border-slate-800 space-y-1">
+            <button
+              onClick={handleShareApp}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-premium-600 hover:bg-premium-50 dark:text-premium-400 dark:hover:bg-premium-950/20 transition-all focus:outline-none"
+            >
+              <Share2 className="h-5 w-5" />
+              Share App with Friends
+            </button>
+
             <button
               onClick={logout}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all focus:outline-none"
             >
               <LogOut className="h-5 w-5" />
               Sign Out

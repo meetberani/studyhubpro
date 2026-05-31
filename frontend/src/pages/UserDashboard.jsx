@@ -5,7 +5,7 @@ import StatCard from '../components/StatCard';
 import AdBanner from '../components/AdBanner';
 import PdfViewer from '../components/PdfViewer';
 import { NoticeSkeleton, TableRowSkeleton } from '../components/SkeletonLoader';
-import { ShieldCheck, User, Star, Megaphone, Clock, Sparkles, BookOpen, ChevronRight, AlertTriangle, XCircle, FileText, Play, Pause, RotateCcw, Award, Trash2, Eye, X, Film, FolderArchive, Download, MessageCircle, Send, BarChart3, Calendar, CheckCircle2, HelpCircle, ExternalLink, Smartphone } from 'lucide-react';
+import { ShieldCheck, User, Star, Megaphone, Clock, Sparkles, BookOpen, ChevronRight, AlertTriangle, XCircle, FileText, Play, Pause, RotateCcw, Award, Trash2, Eye, X, Film, FolderArchive, Download, MessageCircle, Send, BarChart3, Calendar, CheckCircle2, HelpCircle, ExternalLink, Smartphone, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function UserDashboard() {
@@ -92,6 +92,24 @@ export default function UserDashboard() {
   const resetTimer = () => {
     setIsRunning(false);
     setTimeLeft(timerMode === 'study' ? 1500 : 300);
+  };
+
+  const handleShareApp = async () => {
+    const downloadLink = 'https://apkbuild.netlify.app/';
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'EDUCATION07_ - Premium Study Material App',
+          text: 'EDUCATION07_ એપ ડાઉનલોડ કરો! ધોરણ 6 થી 10 અને સરકારી પરીક્ષાઓની શ્રેષ્ઠ તૈયારી. PDFs, Videos, Quizzes - બધું એક જ જગ્યાએ.',
+          url: downloadLink,
+        });
+      } else {
+        throw new Error('Web share not supported');
+      }
+    } catch (err) {
+      const msg = encodeURIComponent(`EDUCATION07_ - Premium Study Material App 📚\n\nધોરણ 6 થી 10 અને સરકારી પરીક્ષાઓની શ્રેષ્ઠ તૈયારી.\nPDFs, Videos, Daily Quizzes - બધું Free!\n\nડાઉનલોડ લિંક 👉 ${downloadLink}`);
+      window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
   };
 
   const removeBookmark = (id, e) => {
@@ -488,10 +506,21 @@ export default function UserDashboard() {
             Monitor your premium state, check active alerts, or focus on studying
           </p>
         </div>
-        {/* Study badge overlay */}
-        <div className="flex gap-2 rounded-2xl bg-white dark:bg-darkbg-200 border border-slate-200/50 dark:border-slate-800/40 p-2 text-[10px] font-bold text-slate-500 shadow-sm glass">
-          <div className="px-2.5 py-1 bg-slate-50 dark:bg-darkbg-100 rounded-xl">
-            Syllabus: <span className="text-premium-500 font-extrabold">{stats.totalMaterials} Items</span>
+        {/* Study badge overlay & Share App Button */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleShareApp}
+            className="flex items-center gap-1.5 rounded-2xl bg-premium-100 hover:bg-premium-200 dark:bg-premium-900/40 dark:hover:bg-premium-900/60 px-3 py-2.5 text-[10px] font-black text-premium-600 dark:text-premium-300 transition-all shadow-sm ring-1 ring-premium-500/10 focus:outline-none"
+            title="Share App with Friends"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            Share App
+          </button>
+          
+          <div className="flex gap-2 rounded-2xl bg-white dark:bg-darkbg-200 border border-slate-200/50 dark:border-slate-800/40 p-2 text-[10px] font-bold text-slate-500 shadow-sm glass">
+            <div className="px-2.5 py-1 bg-slate-50 dark:bg-darkbg-100 rounded-xl">
+              Syllabus: <span className="text-premium-500 font-extrabold">{stats.totalMaterials} Items</span>
+            </div>
           </div>
         </div>
       </div>
