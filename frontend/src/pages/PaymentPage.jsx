@@ -331,11 +331,11 @@ export default function PaymentPage() {
           {/* Real QR image uploaded by user / admin */}
           <div className="relative p-4 rounded-3xl bg-white border border-slate-100 shadow-inner flex items-center justify-center h-60 w-60">
             <img
-              src="/qr_code.png"
+              src="/qr_code.png?v=2"
               onError={(e) => {
                 e.target.onerror = null;
                 // Fallback to backend served uploaded file if local web image fails to load
-                e.target.src = `${SERVER_URL}/uploads/qr_code.png`;
+                e.target.src = `${SERVER_URL}/uploads/qr_code.png?v=2`;
               }}
               alt="UPI Payment QR Code"
               className="h-48 w-48 object-contain"
