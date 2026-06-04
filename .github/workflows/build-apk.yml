@@ -10,6 +10,8 @@ jobs:
   build:
     name: Build React & Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       # 1. Checkout repository codebase
@@ -68,3 +70,17 @@ jobs:
           name: studypro-app-debug-apk
           path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
+
+      # 10. Automatically compile and upload to GitHub Latest Release
+      - name: Release Latest APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Latest Android Build"
+          body: "આ આપણી EDUCATION07_ એન્ડ્રોઇડ એપ્લિકેશનનું લેટેસ્ટ કમ્પાઇલ થયેલું બિલ્ડ છે. દરેક અપડેટ સાથે આ ઓટોમેટિકલી અપડેટ થાય છે."
+          draft: false
+          prerelease: false
+          files: |
+            frontend/android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
