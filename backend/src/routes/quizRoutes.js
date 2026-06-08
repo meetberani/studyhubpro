@@ -3,7 +3,63 @@ const router = express.Router();
 const Quiz = require('../models/Quiz');
 const QuizAttempt = require('../models/QuizAttempt');
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
+
+// @desc    Create a new quiz
+// @route   POST /api/quizzes
+// @access  Private (Admin Only)
+router.post('/', protect, admin, async (req, res) => {
+  try {
+    const { title, subject, pointsForCompletion, questions } = req.body;
+
+    if (!title || !subject || !questions || !Array.isArray(questions)) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+    }
+
+    const quiz = await Quiz.create({
+      title,
+      subject,
+      pointsForCompletion: pointsForCompletion || 50,
+      questions
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Quiz created successfully',
+      data: quiz
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create quiz: ' + error.message
+    });
+  }
+});
+
+// @desc    Delete a quiz
+// @route   DELETE /api/quizzes/:id
+// @access  Private (Admin Only)
+router.delete('/:id', protect, admin, async (req, res) => {
+  try {
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: 'Quiz not found' });
+    }
+
+    await QuizAttempt.deleteMany({ quiz: req.params.id });
+    await quiz.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Quiz deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete quiz: ' + error.message
+    });
+  }
+});
 
 // @desc    Get active quizzes for today
 // @route   GET /api/quizzes

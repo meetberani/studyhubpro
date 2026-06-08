@@ -46,6 +46,13 @@ export default function AdminDashboard() {
   const [activeReplyDoubtId, setActiveReplyDoubtId] = useState(null);
   const [doubtFilter, setDoubtFilter] = useState('all'); // 'all', 'pending', 'solved'
 
+  // Quiz Management State
+  const [quizzesList, setQuizzesList] = useState([]);
+  const [quizForm, setQuizForm] = useState({ title: '', subject: 'Gujarati Grammer', pointsForCompletion: 50 });
+  const [quizQuestions, setQuizQuestions] = useState([
+    { questionText: '', options: ['', '', '', ''], correctOptionIndex: 0, explanation: '' }
+  ]);
+
   const categories = [
     'Gujarati Grammer',
     'English Grammer',
@@ -163,6 +170,7 @@ export default function AdminDashboard() {
     if (activeTab === 'payments') await fetchPayments();
     if (activeTab === 'notices') await fetchNotices();
     if (activeTab === 'doubts') await fetchDoubts();
+    if (activeTab === 'quizzes') await fetchQuizzes();
     setLoading(false);
   };
 
@@ -403,6 +411,119 @@ export default function AdminDashboard() {
     }
   };
 
+  // Fetch Quizzes
+  const fetchQuizzes = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/quizzes`);
+      if (res.data && res.data.success) {
+        setQuizzesList(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Failed to load quizzes.');
+      clearMessages();
+    }
+  };
+
+  // Manage Quiz Formulation
+  const handleAddQuestion = () => {
+    setQuizQuestions([
+      ...quizQuestions,
+      { questionText: '', options: ['', '', '', ''], correctOptionIndex: 0, explanation: '' }
+    ]);
+  };
+
+  const handleRemoveQuestion = (index) => {
+    if (quizQuestions.length <= 1) return;
+    const updated = quizQuestions.filter((_, idx) => idx !== index);
+    setQuizQuestions(updated);
+  };
+
+  const handleQuestionChange = (index, field, value) => {
+    const updated = [...quizQuestions];
+    updated[index][field] = value;
+    setQuizQuestions(updated);
+  };
+
+  const handleOptionChange = (qIndex, optIndex, value) => {
+    const updated = [...quizQuestions];
+    updated[qIndex].options[optIndex] = value;
+    setQuizQuestions(updated);
+  };
+
+  // Create Quiz
+  const handleCreateQuiz = async (e) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!quizForm.title.trim()) {
+      setErrorMsg('Please specify a quiz title.');
+      clearMessages();
+      return;
+    }
+    
+    for (let i = 0; i < quizQuestions.length; i++) {
+      const q = quizQuestions[i];
+      if (!q.questionText.trim()) {
+        setErrorMsg(`Question ${i + 1} has empty question text.`);
+        clearMessages();
+        return;
+      }
+      for (let j = 0; j < 4; j++) {
+        if (!q.options[j].trim()) {
+          setErrorMsg(`Question ${i + 1} option ${j + 1} is empty.`);
+          clearMessages();
+          return;
+        }
+      }
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await axios.post(`${API_URL}/quizzes`, {
+        title: quizForm.title,
+        subject: quizForm.subject,
+        pointsForCompletion: Number(quizForm.pointsForCompletion) || 50,
+        questions: quizQuestions
+      });
+
+      if (res.data && res.data.success) {
+        setSuccessMsg('Quiz created and published successfully!');
+        setQuizForm({ title: '', subject: 'Gujarati Grammer', pointsForCompletion: 50 });
+        setQuizQuestions([
+          { questionText: '', options: ['', '', '', ''], correctOptionIndex: 0, explanation: '' }
+        ]);
+        fetchQuizzes();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.message || 'Failed to create quiz.');
+      clearMessages();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Delete Quiz
+  const handleDeleteQuiz = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this quiz? All user attempts will also be deleted.')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/quizzes/${id}`);
+      if (res.data && res.data.success) {
+        setSuccessMsg(res.data.message || 'Quiz deleted successfully.');
+        fetchQuizzes();
+        fetchStats();
+        clearMessages();
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Failed to delete quiz.');
+      clearMessages();
+    }
+  };
+
   return (
     <div className="flex-1 px-4 py-8 max-w-7xl mx-auto space-y-6">
       {/* Header Panel */}
@@ -460,6 +581,7 @@ export default function AdminDashboard() {
           { id: 'payments', label: 'Payment Approvals', icon: ShieldCheck, count: payments.length },
           { id: 'notices', label: 'Broadcast Bulletin', icon: Megaphone },
           { id: 'doubts', label: 'Student Doubts', icon: MessageCircle, count: pendingDoubtCount },
+          { id: 'quizzes', label: 'Quiz Management', icon: HelpCircle },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -1258,6 +1380,192 @@ export default function AdminDashboard() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 7. Quiz Management Tab */}
+      {activeTab === 'quizzes' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Create Quiz Panel */}
+          <div className="lg:col-span-2 glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-6">
+            <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/40 pb-3">
+              <PlusCircle className="h-4.5 w-4.5 text-premium-500" />
+              Create Daily MCQ Quiz
+            </h3>
+
+            <form onSubmit={handleCreateQuiz} className="space-y-6 text-xs">
+              {/* Quiz Meta Info */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Quiz Title</label>
+                  <input
+                    type="text"
+                    value={quizForm.title}
+                    onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
+                    placeholder="e.g. Daily Gujarati Grammer Practice"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 transition-all"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Subject Category</label>
+                  <select
+                    value={quizForm.subject}
+                    onChange={(e) => setQuizForm({ ...quizForm, subject: e.target.value })}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-3 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 cursor-pointer text-xs sm:text-sm"
+                  >
+                    {categories.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-400 uppercase tracking-widest pl-0.5">Completion Bonus Points</label>
+                  <input
+                    type="number"
+                    value={quizForm.pointsForCompletion}
+                    onChange={(e) => setQuizForm({ ...quizForm, pointsForCompletion: Math.max(0, parseInt(e.target.value) || 0) })}
+                    placeholder="50"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-2.5 px-4 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:border-premium-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/50 dark:text-slate-200 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Questions Area */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/40 pb-2">
+                  <h4 className="font-extrabold text-xs text-slate-500 uppercase tracking-wider">Quiz Questions ({quizQuestions.length})</h4>
+                  <button
+                    type="button"
+                    onClick={handleAddQuestion}
+                    className="flex items-center gap-1 text-[10px] font-bold text-premium-600 bg-premium-50 dark:bg-premium-950/40 hover:bg-premium-100 px-3 py-1.5 rounded-xl transition-all"
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    Add Question
+                  </button>
+                </div>
+
+                {quizQuestions.map((q, qIndex) => (
+                  <div key={qIndex} className="p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 bg-slate-50/30 dark:bg-darkbg-100/20 space-y-4 relative">
+                    {quizQuestions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveQuestion(qIndex)}
+                        className="absolute top-4 right-4 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 p-1.5 rounded-lg transition-all"
+                        title="Remove Question"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+
+                    <div className="pr-8 space-y-3">
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">Question {qIndex + 1} Text</label>
+                        <textarea
+                          value={q.questionText}
+                          onChange={(e) => handleQuestionChange(qIndex, 'questionText', e.target.value)}
+                          placeholder="Type the question query..."
+                          rows="2"
+                          className="w-full rounded-2xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:border-premium-500 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/40 dark:text-slate-200 transition-all resize-none"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {q.options.map((opt, optIndex) => (
+                          <div key={optIndex} className="space-y-1">
+                            <label className="flex items-center gap-1.5 font-bold text-slate-400 uppercase tracking-widest text-[9px] pl-0.5">
+                              <input
+                                type="radio"
+                                name={`correct-${qIndex}`}
+                                checked={q.correctOptionIndex === optIndex}
+                                onChange={() => handleQuestionChange(qIndex, 'correctOptionIndex', optIndex)}
+                                className="text-premium-500 focus:ring-premium-400 h-3.5 w-3.5 cursor-pointer accent-premium-500"
+                              />
+                              Option {String.fromCharCode(65 + optIndex)} {q.correctOptionIndex === optIndex && <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 px-1 rounded">Correct</span>}
+                            </label>
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
+                              placeholder={`Option ${String.fromCharCode(65 + optIndex)} value`}
+                              className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:border-premium-500 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/40 dark:text-slate-200 transition-all"
+                              required
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-400 uppercase tracking-widest text-[9px] pl-0.5">Optional Explanation</label>
+                        <input
+                          type="text"
+                          value={q.explanation}
+                          onChange={(e) => handleQuestionChange(qIndex, 'explanation', e.target.value)}
+                          placeholder="e.g. Correct answer because of Rule X..."
+                          className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:border-premium-500 focus:outline-none dark:border-slate-800 dark:bg-darkbg-100/40 dark:text-slate-200 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={actionLoading}
+                className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-premium-500 py-3.5 text-xs font-bold text-white shadow-lg shadow-premium-500/25 hover:bg-premium-600 disabled:opacity-50 transition-all"
+              >
+                {actionLoading ? 'Publishing Quiz...' : 'Publish Practice Quiz'}
+              </button>
+            </form>
+          </div>
+
+          {/* Active Quizzes List Panel */}
+          <div className="glass rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/50 space-y-4">
+            <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300 pb-3 border-b border-slate-100 dark:border-slate-800/40">
+              Active Daily Quizzes ({quizzesList.length})
+            </h3>
+
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              {loading ? (
+                <>
+                  <TableRowSkeleton />
+                  <TableRowSkeleton />
+                </>
+              ) : quizzesList.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-10 font-medium">No practice quizzes found.</p>
+              ) : (
+                quizzesList.map((quiz) => (
+                  <div
+                    key={quiz._id}
+                    className="flex items-center justify-between gap-3 text-xs p-4 rounded-2xl border border-slate-100 dark:border-slate-800/60 bg-white/30 dark:bg-darkbg-100/10 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all"
+                  >
+                    <div className="truncate w-3/4 space-y-1">
+                      <h4 className="font-extrabold text-slate-700 dark:text-slate-300 truncate">{quiz.title}</h4>
+                      <div className="flex flex-wrap gap-x-2 gap-y-1 items-center text-[9px] text-slate-400 uppercase font-bold">
+                        <span className="text-premium-500 font-extrabold">{quiz.subject}</span>
+                        <span>•</span>
+                        <span>{quiz.questions?.length || 0} MCQ Questions</span>
+                        <span>•</span>
+                        <span>+{quiz.pointsForCompletion || 50} Pts</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteQuiz(quiz._id)}
+                      className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all shrink-0"
+                      title="Delete Quiz"
+                    >
+                      <Trash2 className="h-4.5 w-4.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
