@@ -62,6 +62,6 @@ Security is our top priority. This repository is heavily configured to keep all 
   ### Need Help or Have Feedback?
   Feel free to open an issue in this repository.
 
-  **Built with ❤️ by Meet Berani**
+  **Built by Meet Berani**
 
 </div>
