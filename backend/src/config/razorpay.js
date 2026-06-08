@@ -1,8 +1,8 @@
 const Razorpay = require('razorpay');
 
 // Fallback to live keys directly if environment variables are not set on hosting (e.g. Render Dashboard)
-const keyId = process.env.RAZORPAY_KEY_ID || 'rzp_live_SvY4hhvhYRET9j';
-const keySecret = process.env.RAZORPAY_KEY_SECRET || 'OZvJI4FwdFhSB06QNsF8mgHs';
+const keyId = process.env.RAZORPAY_KEY_ID;
+const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
 const isRazorpayConfigured = !!(
   keyId && 
