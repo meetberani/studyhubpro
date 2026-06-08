@@ -15,7 +15,7 @@ Welcome to **StudyHub Pro**! A premium, subscription-based study material platfo
 
 Get the latest version of the StudyHub Pro Android App here:
 
-[![Download App](https://img.shields.io/badge/Download-Latest_APK-green?style=for-the-badge&logo=android)](https://github.com/meetberani/studyhubpro/releases/latest)
+[![Download App](https://img.shields.io/badge/Download-Latest_APK-green?style=for-the-badge&logo=android)](https://github.com/meetbhai78/premium-study-platform/releases/latest)
 
 > **Note:** Click the link above to download the latest `.apk` file from the Releases page. Ensure you allow "Install from Unknown Sources" on your Android device.
 
