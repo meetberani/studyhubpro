@@ -29,6 +29,8 @@ const materialSchema = new mongoose.Schema({
       'TET',
       'Std 6 to 8',
       'Others',
+      'Teachers Material (Maths Science)',
+      'Others (For Teachers)',
     ],
   },
   type: {

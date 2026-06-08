@@ -50,7 +50,9 @@ const quizSchema = new mongoose.Schema({
       'TAT',
       'TET',
       'Std 6 to 8',
-      'Others'
+      'Others',
+      'Teachers Material (Maths Science)',
+      'Others (For Teachers)'
     ],
   },
   questions: [questionSchema],

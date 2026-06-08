@@ -36,7 +36,9 @@ export default function Materials() {
     'TAT': { icon: Sparkles, color: 'from-fuchsia-500 to-indigo-650' },
     'TET': { icon: Award, color: 'from-rose-500 to-pink-600' },
     'Std 6 to 8': { icon: GraduationCap, color: 'from-emerald-500 to-sky-650' },
-    'Others': { icon: FolderOpen, color: 'from-slate-500 to-slate-600' }
+    'Others': { icon: FolderOpen, color: 'from-slate-500 to-slate-600' },
+    'Teachers Material (Maths Science)': { icon: GraduationCap, color: 'from-emerald-500 to-teal-600' },
+    'Others (For Teachers)': { icon: FolderOpen, color: 'from-indigo-500 to-purple-650' }
   };
   const navigate = useNavigate();
 
@@ -77,6 +79,8 @@ export default function Materials() {
     'TET',
     'Std 6 to 8',
     'Others',
+    'Teachers Material (Maths Science)',
+    'Others (For Teachers)',
   ];
 
   const fetchMaterials = async () => {

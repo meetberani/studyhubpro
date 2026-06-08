@@ -23,6 +23,8 @@ export default function Home() {
     { name: 'TET', icon: Award, color: 'from-rose-500 to-pink-600', desc: 'TET ૧ અને ૨ માટે ઉપયોગી મટીરીયલ્સ' },
     { name: 'Std 6 to 8', icon: GraduationCap, color: 'from-emerald-500 to-sky-650', desc: 'ધોરણ ૬ થી ૮ અભ્યાસક્રમ અને પુસ્તકો' },
     { name: 'Others', icon: FolderOpen, color: 'from-slate-500 to-slate-600', desc: 'અન્ય ઉપયોગી ફાઈલો અને મોક પેપર્સ' },
+    { name: 'Teachers Material (Maths Science)', icon: GraduationCap, color: 'from-emerald-500 to-teal-600', desc: 'શિક્ષકો માટે ગણિત અને વિજ્ઞાનનું સાહિત્ય' },
+    { name: 'Others (For Teachers)', icon: FolderOpen, color: 'from-indigo-500 to-purple-600', desc: 'શિક્ષકો માટે અન્ય ઉપયોગી મટીરીયલ્સ' },
   ];
 
   const handleShareApp = async () => {

@@ -62,6 +62,8 @@ export default function AdminDashboard() {
     'TET',
     'Std 6 to 8',
     'Others',
+    'Teachers Material (Maths Science)',
+    'Others (For Teachers)',
   ];
 
   const chartData = [
@@ -80,6 +82,8 @@ export default function AdminDashboard() {
     { label: 'TET', pct: '16%', height: 64, fill: 'url(#indigoBar)' },
     { label: 'Std 6-8', pct: '10%', height: 42, fill: 'url(#cyanBar)' },
     { label: 'Others', pct: '8%', height: 35, fill: 'url(#pinkBar)' },
+    { label: 'Teach Mat', pct: '15%', height: 60, fill: 'url(#purpleBar)' },
+    { label: 'Oth Teach', pct: '12%', height: 50, fill: 'url(#indigoBar)' },
   ];
 
   // Clear notifications
